@@ -165,7 +165,7 @@
 <div class="container">
     <div class="terminal-line">┌──(root㉿kali)-[~]</div>
     <div class="terminal-line">└─$ ./orsoline_exploit --target registro.orsoline.it</div>
-    <div class="terminal-line">[+] Target acquired. Database caricato: 165 records</div>
+    <div class="terminal-line">[+] Target acquired. Database caricato: <span id="recordCount">0</span> records</div>
     
     <div class="input-line">
         <span class="input-prompt"></span>
@@ -180,8 +180,12 @@
 </div>
 
 <script>
-    // DATABASE COMPLETO (165 records)
-    const database = [
+    // ============================================================
+    // DATABASE COMPLETO (unione del vecchio + nuovo)
+    // ============================================================
+    
+    // Database originale (165 records)
+    const databaseOriginale = [
         {id: '130769', email1: 'cristiana.ruzzettu@gmail.com', email2: 'fabio.faldetta@gmail.com'},
         {id: '130770', email1: 'c.margani@gmail.com', email2: 'gabriele.bruni@gmail.com'},
         {id: '130771', email1: 'e.primeri@libero.it', email2: 'max02062002@gmail.com'},
@@ -315,11 +319,424 @@
         {id: '131009', email1: 'cecilia.def@gmail.com', email2: 'vittorio.vec@gmail.com'}
     ];
 
-    console.log(`Database caricato: ${database.length} records`);
+    // NUOVO DATABASE dal file orsoline_complete_scan_20260309_114213.csv
+    const databaseNuovo = [
+        {id: '04936', email1: 'b.sanrome@tiscali.it', email2: 'rncostant63@gmail.com'},
+        {id: '07290', email1: 'tatyanaco2908@gmail.com', email2: 'bruno@studiodebenedetto.it'},
+        {id: '12795', email1: 'letiziarodilosso@gmail.com', email2: 'g.arnaboldi@studioarnaboldi.eu'},
+        {id: '12809', email1: 'emanuela_sala@virgilio.it', email2: 'andrea.polizzotto@ibkbroker.it'},
+        {id: '14426', email1: 'nazlori@hotmail.com', email2: 'dileksavran@gmail.com'},
+        {id: '14535', email1: 'romano.alessandra@hotmail.it', email2: 'mongi.boukhris67@gmail.com'},
+        {id: '14538', email1: 'avv.bergo@gmail.com', email2: 'laura.talamona465@gmail.com'},
+        {id: '15234', email1: 'kohka@hotmail.it', email2: 'lucaforlico@gmail.com'},
+        {id: '15243', email1: 'ormazzella@hotmail.com', email2: 'dpmm77@hotmail.com'},
+        {id: '19116', email1: 'rosita.leone@gmail.com', email2: 'boselli.paolo@gmail.com'},
+        {id: '19135', email1: 'smeroni@grimaldistorecomo.it', email2: 'ecarugati@grimaldistorecomo.it'},
+        {id: '19153', email1: 'davide.mirabella1@gmail.com', email2: 'patrizialedonne@libero.it'},
+        {id: '19154', email1: 'davide.mirabella1@gmail.com', email2: 'patrizialedonne@libero.it'},
+        {id: '19788', email1: 'verovanella@gmail.com', email2: 'ivano.cerliani@gmail.com'},
+        {id: '20816', email1: 'barbara.argilla@gmail.com', email2: 'giancarlo.vaccaro@tiscali.it'},
+        {id: '23049', email1: 'p.sciaini@alice.it', email2: 'varanokatia5@gmail.com'},
+        {id: '23097', email1: 'francesco.maino@gmail.com', email2: 'marta.berselli80@gmail.com'},
+        {id: '23098', email1: 'luciadigennaro@gmail.com', email2: 'oscar.mariani@gmail.com'},
+        {id: '23106', email1: 'valentina.tosetti@gmail.com', email2: 'alessandro.frigerio74@gmail.com'},
+        {id: '23713', email1: 'olirestelli@yahoo.it', email2: 'nicolaghezzi@yahoo.it'},
+        {id: '23727', email1: 'monica.lamberti@live.com', email2: 'marcello.moscetti@hotmail.com'},
+        {id: '24063', email1: 'dott.nicola-manna@virgilio.it', email2: 'paolasaviotti7@gmail.com'},
+        {id: '24014', email1: 'antonelladamiani79@gmail.com', email2: 'enzo.ba@hotmail.it'},
+        {id: '24025', email1: 'paola.cairoli@gmail.com', email2: 'andrea72.galimberti@gmail.com'},
+        {id: '24087', email1: 'ormazzella@hotmail.com', email2: 'dpmm77@hotmail.com'},
+        {id: '24112', email1: 'giriso32@yahoo.it', email2: 'luca@mvdesignsa.ch'},
+        {id: '24116', email1: 'federico.senese@gmail.com', email2: 'mecheluna@gmail.com'},
+        {id: '24130', email1: 'sylvie_cherie@hotmail.com', email2: 'antonio.iannone1978@gmail.com'},
+        {id: '24136', email1: 'nimargiotta@gmail.com', email2: 'fiorelisabetta@gmail.com'},
+        {id: '24150', email1: 'alla.floranord@gmail.com', email2: 'plantsniekerk@gmail.com'},
+        {id: '24161', email1: 'flavioconti69@gmail.com', email2: 'dia_bojan@yahoo.com'},
+        {id: '24162', email1: 'paolamariamoretti77@gmail.com', email2: 'giacomo.majorana@libero.it'},
+        {id: '24171', email1: 'giuliamutti@libero.it', email2: 'danielebaffetti@libero.it'},
+        {id: '24181', email1: 'emanuela_sala@virgilio.it', email2: 'andrea.polizzotto@ibkbroker.it'},
+        {id: '24183', email1: 'chichi.carmen@virgilio.it', email2: 'beppe.77@libero.it'},
+        {id: '24189', email1: 'cristinaalbonico1@gmail.com', email2: 'pzara74@gmail.com'},
+        {id: '24191', email1: 'anna.arcara@gmail.com', email2: 'giovanni.fenizia@gmail.com'},
+        {id: '24195', email1: 'carlina71981@gmail.com', email2: 'gerardo@casadellagomma.it'},
+        {id: '24205', email1: 'botturi_g@hotmail.com', email2: 'luciferrari@virgilio.it'},
+        {id: '24207', email1: 'romina.giuliano87@gmail.com', email2: 'ruggiero.michele@yahoo.com'},
+        {id: '24223', email1: 'lorena.anna.rocca@gmail.com', email2: 'ing.ruggiero@minigrip.it'},
+        {id: '24232', email1: 'ingranyeninleys@gmail.com', email2: 'dolcecubanita@libero.it'},
+        {id: '24257', email1: 'ceciliaskor@gmail.com', email2: 'andrea@brunate.it'},
+        {id: '24268', email1: 'bergonzi.carlo86@gmail.com', email2: 'erika.panetta@tiscali.it'},
+        {id: '24275', email1: 'sabrinaschiavello@libero.it', email2: 'alberto.amarante@iccapital.com'},
+        {id: '24279', email1: 'luciadigennaro@gmail.com', email2: 'oscar.mariani@gmail.com'},
+        {id: '24308', email1: 'andree.albini@icloud.com', email2: 'michele.taccagni@icloud.com'},
+        {id: '24307', email1: 'mauro.consonni@poltronesofa.com', email2: 'mauro.cons@gmail.com'},
+        {id: '24324', email1: 'silvia.tettamanti1@gmail.com', email2: 'bernasconi.tz@gmail.com'},
+        {id: '24330', email1: 'anitamolteni@icloud.com', email2: 'g.puntello@pbcb.it'},
+        {id: '24347', email1: 'fiorella.fossati@gmail.com', email2: 'nicola.fiorillo@gmail.com'},
+        {id: '24319', email1: 'marta.berselli80@gmail.com', email2: 'francesco.maino@gmail.com'},
+        {id: '24321', email1: 'elena.provenzano@yahoo.it', email2: 'carugaticarlo@yahoo.it'},
+        {id: '24325', email1: 'verena.corrias@ivecogroup.com', email2: 'pietro.zizza@akzonobel.com'},
+        {id: '24380', email1: 'annarita.amendolara@libero.it', email2: 'andrea.lattanzi@libero.it'},
+        {id: '24378', email1: 'fabio.lupo@hotmail.it', email2: 'lauraprocedi@hotmail.com'},
+        {id: '24387', email1: 'p.pica@abppartners.com', email2: 'alessia120816@gmail.com'},
+        {id: '24343', email1: 'laurabologna07@libero.it', email2: 'enricoviviani@yahoo.it'},
+        {id: '24345', email1: 'sara.signorelli@yahoo.it', email2: 'cchristian75@yahoo.it'},
+        {id: '24363', email1: 'tatafuma@yahoo.it', email2: 'drsimonebianchi@outlook.com'},
+        {id: '24404', email1: 'silvia-migliaccio@libero.it', email2: 'francesco.arosio@libero.it'},
+        {id: '24408', email1: 'burla4ka@inbox.lv', email2: 'gorlaclaudio@mechim.com'},
+        {id: '24384', email1: 'n.galuppo@studiolegalegaluppo.it', email2: 'michybogani@libero.it'},
+        {id: '24393', email1: 'marasapia0101@gmail.com', email2: 'sebastiandelafuente76@gmail.com'},
+        {id: '24456', email1: 'antonelladamiani79@gmail.com', email2: 'enzo.ba@hotmail.it'},
+        {id: '24451', email1: 'francesca.sperotti@gmail.com', email2: 'giacomo.toffetti@gmail.com'},
+        {id: '24476', email1: 'fra.toninato@gmail.com', email2: 'mailing@millenium3.it'},
+        {id: '24473', email1: 'ramona8482@gmail.com', email2: 'andrea.cavallasca@gmail.com'},
+        {id: '24481', email1: 'ecm.gaston@gmail.com', email2: 'gorenko.oksana@gmail.com'},
+        {id: '24490', email1: 'robisulmoni@gmail.com', email2: 'alessandro.bruschi@bluewin.ch'},
+        {id: '24491', email1: 'chiara.tettamanti@icloud.com', email2: 'luca.frangi@icloud.com'},
+        {id: '24513', email1: 'giochiesa@gmail.com', email2: 'cecilia.pedretti@live.it'},
+        {id: '24518', email1: 'claudiacele@tim.it', email2: 'minocassiano8@gmail.com'},
+        {id: '24517', email1: 'saramalinit@gmail.com', email2: 'gabriele.tettamanzi@gmail.com'},
+        {id: '24523', email1: 'micol.bianchi@hotmail.it', email2: 'davide.tettamanzi@gmail.com'},
+        {id: '24530', email1: 'claudiacoduri@virgilio.it', email2: 'marco.sorini@emmemme.co.it'},
+        {id: '24548', email1: 'a.vilagiova@gmail.com', email2: 'adrianuscis@gmail.com'},
+        {id: '24551', email1: 'prasadherath6@gmail.com', email2: 'prasadherath6@gmail.com'},
+        {id: '24549', email1: 'a.vilagiova@gmail.com', email2: 'adrianuscis@gmail.com'},
+        {id: '24558', email1: 'pamelaannoni@hotmail.com', email2: 'fabrizio.micheletti@libero.it'},
+        {id: '24564', email1: 'panzillo_s@risogallo.com', email2: 'salvodm87@gmail.com'},
+        {id: '24565', email1: 'paola.scudiero@gmail.com', email2: 'alcarbon@libero.it'},
+        {id: '24571', email1: 'chiriacv@gmail.com', email2: 'anayastreb@gmail.com'},
+        {id: '24572', email1: 'chiriacv@gmail.com', email2: 'anayastreb@gmail.com'},
+        {id: '24582', email1: 'barbara81milone@gmail.com', email2: 'mirko.milone@gmail.com'},
+        {id: '24583', email1: 'justyna.pasiewicz@gmail.com', email2: 'valerio.averono@gmail.com'},
+        {id: '24595', email1: 'albertoiornomabetex@gmail.com', email2: 'annakaniorno13@gmail.com'},
+        {id: '24597', email1: 'carlochiurato@me.com', email2: 'carlochiurato@alice.it'},
+        {id: '24599', email1: 'luciadigennaro@gmail.com', email2: 'oscar.mariani@gmail.com'},
+        {id: '24602', email1: 'gander.elena@gmail.com', email2: 'bottagander@gmail.com'},
+        {id: '24601', email1: 'tianitaurisano@gmail.com', email2: 'fedecom85@yahoo.it'},
+        {id: '24600', email1: 'chiaragodio1973@gmail.com', email2: 'alessandrozanini@motorquality.it'},
+        {id: '24622', email1: 'adry.sala@libero.it', email2: 'thomas.bolla@topjet.net'},
+        {id: '24632', email1: 'romina.giuliano87@gmail.com', email2: 'ruggiero.michele@yahoo.com'},
+        {id: '24631', email1: 'luciferrari@virgilio.it', email2: 'botturi_g@hotmail.com'},
+        {id: '24637', email1: 'ale.r.giolollo@gmail.com', email2: 'luigi.trioni@gmail.com'},
+        {id: '24638', email1: 'marisacesana74@gmail.com', email2: 'fusicristiano@gmail.com'},
+        {id: '24640', email1: 'anna.marcolin86@gmail.com', email2: 'mandaglio_alessandro@hotmail.it'},
+        {id: '24645', email1: 'caterina@caterinapagani.it', email2: 'massimingo@gmail.com'},
+        {id: '24662', email1: 'lillysig@libero.it', email2: 'fausto@emmegiemmesrl.it'},
+        {id: '24615', email1: 'federicapigoli@gmail.com', email2: 'nasirkhilji@gmail.com'},
+        {id: '24618', email1: 'paola.scudiero@gmail.com', email2: 'alcarbon@libero.it'},
+        {id: '24610', email1: 'marina.pacini2@gmail.com', email2: 'lucacaon@tin.it'},
+        {id: '24664', email1: 'flissdonia@hotmail.fr', email2: 'gigi.donia@gmail.com'},
+        {id: '24620', email1: 'fiorella.fossati@gmail.com', email2: 'nicola.fiorillo@gmail.com'},
+        {id: '24612', email1: 'ireneriva72@gmail.com', email2: 'bianchino.123@hotmail.it'},
+        {id: '24663', email1: 'francesca.cola.coni@gmail.com', email2: 'angelo@gc-sa.ch'},
+        {id: '24613', email1: 'roberta.bulgheroni@gmail.com', email2: 'alfio.canesin@gmail.com'},
+        {id: '24670', email1: 'debora.baldinelli@gmail.com', email2: 'alessandro@biasiotti.com'},
+        {id: '24678', email1: 'langhi.man@gmail.com', email2: 'e_paolillo@virgilio.it'},
+        {id: '24686', email1: 'dellatorrep73@gmail.com', email2: 'marco.cantaluppi70@gmail.com'},
+        {id: '24652', email1: 'elisa@bianchigeomdante.com', email2: 'info@valde.it'},
+        {id: '24649', email1: 'giselda.cianciola@gmail.com', email2: 'avv.gcianciola@libero.it'},
+        {id: '24639', email1: 'stefania.gasperi@hotmail.it', email2: 'max.lauriola@icloud.com'},
+        {id: '24643', email1: 'valeclerici@gmail.com', email2: 'robertoborgno@gmail.com'},
+        {id: '24658', email1: 'agnese.cavallini@doc.orsoline.it', email2: 'elia.grimo10@gmail.com'},
+        {id: '24706', email1: 'canepaelisa@yahoo.com', email2: 'maestro.arrigo@yahoo.it'},
+        {id: '24672', email1: 'arianna.longoni@gmail.com', email2: 'riccardo.pasquale@hotmail.com'},
+        {id: '24720', email1: 'tatafuma@yahoo.it', email2: 'drsimonebianchi@outlook.com'},
+        {id: '24725', email1: 'stefania.gasperi@hotmail.it', email2: 'max.lauriola@icloud.com'},
+        {id: '24724', email1: 'marica.gallo86@gmail.com', email2: 'fabrizio2406@gmail.com'},
+        {id: '24677', email1: 'silviazanin1975@gmail.com', email2: '2m_moschino@alice.it'},
+        {id: '24726', email1: 'stefania.gasperi@hotmail.it', email2: 'max.lauriola@icloud.com'},
+        {id: '24729', email1: 'fra.toninato@gmail.com', email2: 'mailing@millenium3.it'},
+        {id: '24691', email1: 'lidija.fodor.zg@gmail.com', email2: 'vivanic@yahoo.com'},
+        {id: '24734', email1: 'paola.fornasati.81@gmail.com', email2: 'daniele.ottone.79@gmail.com'},
+        {id: '24737', email1: 'panzillo_s@risogallo.com', email2: 'salvodm87@gmail.com'},
+        {id: '24739', email1: 'marina.lucarda@alice.it', email2: 'alessandroceroni70@gmail.com'},
+        {id: '24742', email1: 'paola.gandola@tin.it', email2: 'paolocanavesi@virgilio.it'},
+        {id: '24743', email1: 'vale.berry@hotmail.it', email2: 'gabo1983@hotmail.it'},
+        {id: '24741', email1: 'elli.costanza@gmail.com', email2: 'luigi.vallese@gmail.com'},
+        {id: '24744', email1: 'sabrinacivati@libero.it; orologiperpassione.como@gmail.com', email2: 'sabrina.civati71@gmail.com'},
+        {id: '24750', email1: 'rcasartelli74@gmail.com', email2: 'patrick.robi@virgilio.it'},
+        {id: '24721', email1: 'francesca.lironi@medtronic.com', email2: 'sangiorgiodavide@hotmail.com'},
+        {id: '24764', email1: 'amministrazione@cetti.eu', email2: 'luigi@cetti.eu'},
+        {id: '24761', email1: 'emanuelaguastalli@virgilio.it', email2: 'mlc.architetto@gmail.com'},
+        {id: '24713', email1: 'michela.agliati@gmail.com', email2: 'carlonovati@hotmail.com'},
+        {id: '24772', email1: 'antonelladamiani79@gmail.com', email2: 'enzo.ba@hotmail.it'},
+        {id: '24767', email1: 'alessia120816@gmail.com', email2: 'p.pica@abppartners.com'},
+        {id: '24779', email1: 'elena.locatelli@hotmail.it', email2: 'arch.golfieri@gmail.com'},
+        {id: '24782', email1: 'seregiudici@gmail.com', email2: 'andreacorti@libero.it'},
+        {id: '24778', email1: 'elena.locatelli@hotmail.it', email2: 'arch.golfieri@gmail.com'},
+        {id: '24783', email1: 'rossanagiuliani1964@gmail.com', email2: 'eros.ginoinvernizzi@gmail.com'},
+        {id: '24787', email1: 'lea_modaffari@hotmail.it', email2: 'riccardograssotti@libero.it'},
+        {id: '24785', email1: 'elecappelletti@yahoo.it', email2: 'alan.sampietro@yahoo.it'},
+        {id: '24792', email1: 'giselda.cianciola@gmail.com', email2: 'andreachirico79@gmail.com'},
+        {id: '24797', email1: 'ilariapassafiume@gmail.com', email2: 'luca.battista.1991@gmail.com'},
+        {id: '24802', email1: '373776707@qq.com', email2: 'jennyhu88@qq.com'},
+        {id: '24800', email1: 'paola.cinquanta84@gmail.com', email2: 'giuseppesoccini@yahoo.it'},
+        {id: '24813', email1: 'valentinavconti@gmail.com', email2: 'ste.tassinari@gmail.com'},
+        {id: '24801', email1: 'pacalina7@gmail.com', email2: 'roger.patriarca@gmail.com'},
+        {id: '24811', email1: 'daniela-rusconi@virgilio.it', email2: 'fabiotaddei4477@gmail.com'},
+        {id: '24812', email1: 'valentinavconti@gmail.com', email2: 'ste.tassinari@gmail.com'},
+        {id: '24817', email1: 'tsherem@hotmail.com', email2: 'roncoroni.andrea@gmail.com'},
+        {id: '24818', email1: 'paola.bianchi@email.it', email2: 'lorenzo.ballerini23@gmail.com'},
+        {id: '24819', email1: 'vittosma@gmail.com', email2: 'nicolazotta@hotmail.com'},
+        {id: '24827', email1: 'barbaralapingi@icloud.com', email2: 'giovannipingitoreautoservicesrl@pec.it'},
+        {id: '24824', email1: 'turek350@wp.pl', email2: 'turek350@wp.pl'},
+        {id: '24841', email1: 'alessandra.priano@tiscali.it', email2: 'alex@macelleriadonegana.it'},
+        {id: '24842', email1: 'arch.rigamontielena@gmail.com', email2: 'rivangelorh@gmail.com'},
+        {id: '24851', email1: 'ggallotti@gmail.com', email2: 'l.schiavio@gmail.com'},
+        {id: '24847', email1: 'agnese.cavallini@doc.orsoline.it', email2: 'elia.grimo10@gmail.com'},
+        {id: '24845', email1: 'monika.poma@virgilio.it', email2: 'fabrinata69@gmail.com'},
+        {id: '24803', email1: '373776707@qq.com', email2: 'jennyhu88@qq.com'},
+        {id: '24864', email1: 'tys.anna@outlook.it', email2: 'redacop@hotmail.com'},
+        {id: '24872', email1: 'arianna.mazzetta@doc.orsoline.it', email2: 'gianlucagiorgio85@gmail.com'},
+        {id: '24863', email1: 'studiodentisticobalzaretti@gmail.com', email2: 'butticristian@gmail.com'},
+        {id: '24880', email1: 'claghioldi@gmail.com', email2: 'alexis.petralia@gmail.com'},
+        {id: '24881', email1: 'arianna.marelli@hotmail.it', email2: 'acquavita@libero.it'},
+        {id: '24875', email1: 'gaiaschwegler@gmail.com', email2: 'gaiaschwegler@gmail.com'},
+        {id: '24866', email1: 'silvialeo1979@hotmail.it', email2: 'stefanobrenna@hotmail.com'},
+        {id: '24876', email1: 'adry.sala@libero.it', email2: 'thomas.bolla@topjet.net'},
+        {id: '24868', email1: 'rosapestuggia9@gmail.com', email2: 'fasolidavide1@gmail.com'},
+        {id: '24869', email1: 'mandotti.valentina@gmail.com', email2: 'volonte.paolo@gmail.com'},
+        {id: '24889', email1: 'simone.carraro74@gmail.com', email2: 'emunteanu@gmail.com'},
+        {id: '24882', email1: 'maruska@grisoni.co', email2: 'sandro.grisoni@gmail.com'},
+        {id: '24884', email1: 'martaphdbrescia@gmail.com', email2: 'lorenzo@colomboprogetti.it'},
+        {id: '24883', email1: 'erikag.lombardo@yahoo.it', email2: 'recalcatidavide@gmail.com'},
+        {id: '24895', email1: 'elisabettapaglia3@gmail.com', email2: 'riccardo.rossin@puntocometa.org'},
+        {id: '24899', email1: 'francesco.tatoli@italbaby.com', email2: 'maria.petrotta@italbaby.com'},
+        {id: '24892', email1: 'patriziamesiti@libero.it', email2: 'juliana12@libero.it'},
+        {id: '24897', email1: 'erika.speri83@gmail.com', email2: 'carlo.garbagna@gmail.com'},
+        {id: '24893', email1: 'roberta.bulgheroni@gmail.com', email2: 'alfio.canesin@gmail.com'},
+        {id: '24885', email1: 'dolci.vittoria@gmail.com', email2: 'renzulli.alessandro@gmail.com'},
+        {id: '24902', email1: 'amanncristina@gmail.com', email2: 'cella.anitaitalia@gmail.com'},
+        {id: '24900', email1: 'p.casartelli@icloud.com', email2: 'valebo@hotmail.com'},
+        {id: '24906', email1: 'claudia.finiguerra@teaconsulting.ch', email2: 'antonio.carati@icloud.com'},
+        {id: '24907', email1: 'marilena.scuola68@gmail.com', email2: 'paolo.binda@puntocometa.org'},
+        {id: '24903', email1: 'cnapolit@libero.it', email2: 'lukesanti@libero.it'},
+        {id: '24904', email1: 'aimepietro@yahoo.it', email2: 'vnukovskayalex@hotmail.fr'},
+        {id: '24909', email1: 'samuela.dalzotto@gmail.com', email2: 'mdz@tecnodal.it'},
+        {id: '24918', email1: 'silvia.ciceri@gmail.com', email2: 'ld.o@hotmail.com'},
+        {id: '24924', email1: 'sabrina.nardone@gmail.com', email2: 'mateo.boneschi@gmail.com'},
+        {id: '24920', email1: 'paolo.binda@puntocometa.org', email2: 'marilena.maspero@puntocometa.org'},
+        {id: '24926', email1: 'chiarabs27@gmail.com', email2: 'andreaeu@omgespa.it'},
+        {id: '24928', email1: 'silviazanin1975@gmail.com', email2: '2m_moschino@alice.it'},
+        {id: '24923', email1: 'cmas.cam73@gmail.com', email2: 'campagnoli@newticis.ch'},
+        {id: '24925', email1: 'trilly.silvia@hotmail.it', email2: 'lucaj17@hotmail.com'},
+        {id: '24936', email1: 'glorianespoli59@gmail.com', email2: 'info@albergo-vittoria.com'},
+        {id: '24938', email1: 'iole.gre@gmail.com', email2: 'carminedaloia@gmail.com'},
+        {id: '24937', email1: 'yuedoale@gmail.com', email2: 'gianniyu@gmail.com'},
+        {id: '24947', email1: 'elenabotta1980@gmail.com', email2: 'lucamelli73@gmail.com'},
+        {id: '24932', email1: 'marasapia0101@gmail.com', email2: 'sebastiandelafuente76@gmail.com'},
+        {id: '24911', email1: 'avvfontana@studiobancora.it', email2: 'ebancora@studiobancora.it'},
+        {id: '24908', email1: 'elena@tstcargo.com', email2: 'dario@tstcargo.com'},
+        {id: '24919', email1: 'mitrushiarjola@yahoo.it', email2: 'mitrushipiro@yahoo.it'},
+        {id: '24962', email1: 'info@comoboatcharter.com', email2: 'spiridonova2511@gmail.com'},
+        {id: '24915', email1: 'francy.spataro@hotmail.it', email2: 'davcalifano@gmail.com'},
+        {id: '24971', email1: 'bellieniroberto@gmail.com', email2: 'founder@giorgiajenca.com'},
+        {id: '24922', email1: 'frangieleonora01@gmail.com', email2: 'stefanomarcello26@gmail.com'},
+        {id: '24970', email1: 'paolo.binda@puntocometa.org', email2: 'marilena.scuola68@gmail.com'},
+        {id: '24969', email1: 'emi.cerulli@gmail.com', email2: 'christian.romano@bps-suisse.ch'},
+        {id: '24916', email1: 'lorena.beccardi@alice.it', email2: 'direzione@masnerimpianti.com'},
+        {id: '24935', email1: 'b.dallachiesa@tiscali.it', email2: 'riccardomiccoli@yahoo.it'},
+        {id: '24917', email1: 'silvia.ciceri@gmail.com', email2: 'ld.o@hotmail.com'},
+        {id: '24933', email1: 'barbara81milone@gmail.com', email2: 'mirko.milone@gmail.com'},
+        {id: '24976', email1: 'adristefa@yahoo.co.uk', email2: 'soeren@langhoff.dk'},
+        {id: '24972', email1: 'anna.diriso@outlook.it', email2: 'fam.carucci@gmail.com'},
+        {id: '24978', email1: 'monidos@hotmail.it', email2: 'rpaludetti@gmail.com'},
+        {id: '24974', email1: 'incentro.cinzia@gmail.com', email2: 'samuelsimone2008@gmail.com'},
+        {id: '24931', email1: 'mreateguig@hotmail.com', email2: 'luigienrico@blu.it'},
+        {id: '24984', email1: 'michela.donegani@gmail.com', email2: 'besseghini.roberto@gmail.com'},
+        {id: '24991', email1: 'gaetanamontaldo@icloud.com', email2: 'fedegu@gmail.com'},
+        {id: '24949', email1: 'nixiaoxiao88@hotmail.com', email2: 'zhang831006@hotmail.com'},
+        {id: '24983', email1: 'felix.ilary57@gmail.com', email2: 'felix.ilary@alice.it'},
+        {id: '24950', email1: 'p.casartelli@icloud.com', email2: 'valebo@hotmail.com'},
+        {id: '24990', email1: 'collalti@medacta.ch', email2: 'info@vitoruscio.com'},
+        {id: '24945', email1: 'elisa.tanaka1@gmail.com', email2: 'markrobertnorton@me.com'},
+        {id: '24953', email1: 'spitti.82@tiscali.it', email2: 'tullioabbate5@gmail.com'},
+        {id: '24951', email1: 'emanuelebovino@gmail.com', email2: 'altagraciamejia1972@gmail.com'},
+        {id: '24988', email1: 'lisonika@inbox.ru', email2: '7259079@gmail.com'},
+        {id: '24948', email1: 'cristinaalbonico1@gmail.com', email2: 'pzara74@gmail.com'},
+        {id: '24960', email1: 'paolo@mbexpress.ch', email2: 'alessandra@mbexpress.ch'},
+        {id: '24993', email1: 'dritansfinjari@gmail.com', email2: 'sidasfinjari@gmail.com'},
+        {id: '25039', email1: 'valentinaromeo82@gmail.com', email2: 'adodzcomo@gmail.com'},
+        {id: '25038', email1: 'adriana.aurora23@gmail.com', email2: 'aahj23@gmail.com'},
+        {id: '25026', email1: 'michibianchi@gmail.com', email2: 'dr.cesarebarbieri@gmail.com'},
+        {id: '25053', email1: 'raffipiazza@icloud.com', email2: 'ufronterre@icloud.com'},
+        {id: '25055', email1: 'sabrina.agnetti80@gmail.com', email2: 'dariocorbella.como@gmail.com'},
+        {id: '25060', email1: 'janacechova428@gmail.com', email2: 'lsantaroni@staxlaw.com'},
+        {id: '25057', email1: 'baldovino.f@gmail.com', email2: 'patriciafernandes.pt@gmail.com'},
+        {id: '25065', email1: 'tianitaurisano@gmail.com', email2: 'fedecom85@yahoo.it'},
+        {id: '25066', email1: 'fraapeta@libero.it', email2: 'a.arcudi@libero.it'},
+        {id: '25068', email1: 'baricci.francesca@gmail.com', email2: 'geom.abbate.gabriele@hotmail.it'},
+        {id: '25067', email1: 'fraapeta@libero.it', email2: 'a.arcudi@libero.it'},
+        {id: '25070', email1: 'annalisaleo@bluewin.ch', email2: 'andrealeo@bluewin.ch'},
+        {id: '25037', email1: 'molinelli.maddalena@gmail.com', email2: 'achille.pedraglio@gmail.com'},
+        {id: '25076', email1: 'ciprianisara1@gmail.com', email2: 'mgalli1969@gmail.com'},
+        {id: '25079', email1: 'roberta.ferraris@gmail.com', email2: 'giacomo_carcano@yahoo.it'},
+        {id: '25073', email1: 'raffaelerigamonti@outlook.it', email2: 'lubicafranova@gmail.com'},
+        {id: '25081', email1: 'gabriomancardi@gmail.com', email2: 'babigabardi@gmail.com'},
+        {id: '25080', email1: 'arch.luisavalli@v3costruzioni.it', email2: 'paolo.epistolio@gmail.com'},
+        {id: '25077', email1: 'elena.laporta74@gmail.com', email2: 'massimiliano.fasana@alice.it'},
+        {id: '25078', email1: 'roberta.ferraris@gmail.com', email2: 'giacomo_carcano@yahoo.it'},
+        {id: '25043', email1: 'giochiesa@gmail.com', email2: 'ceci.pedretti@gmail.com'},
+        {id: '25040', email1: 'michiceria@gmail.com', email2: 'pietro.magnoli@gmail.com'},
+        {id: '25095', email1: 'chiara.vignali@gmail.com', email2: 'enricofigini@gmail.com'},
+        {id: '25085', email1: 'alberto.dubuis@gmail.com', email2: 'blackcatwhitecat@yandex.ru'},
+        {id: '25092', email1: 'dbrenna@comofil.it', email2: 'filippo.giulivi@icloud.com'},
+        {id: '25090', email1: 'luisa.pattaro@gmail.com', email2: 'alessandro.nespoli@nespoligroup.com'},
+        {id: '25084', email1: 'collalti@medacta.ch', email2: 'info@vitoruscio.com'},
+        {id: '25086', email1: 'anna.arcara@gmail.com', email2: 'giovanni.fenizia@gmail.com'},
+        {id: '25089', email1: 'andrea.grijalba@hotmail.com', email2: 'simonefatiga@gmail.com'},
+        {id: '25091', email1: 'paola.cinquanta84@gmail.com', email2: 'gianlucacapellino@hotmail.com'},
+        {id: '25099', email1: 'luca.manieri78@gmail.com', email2: 'fulcoalessandra@gmail.com'},
+        {id: '25087', email1: 'elisa.rampinini@icloud.com', email2: 'claudio.alberio81@gmail.com'},
+        {id: '25100', email1: 'sea.cima@gmail.com', email2: 'dave.rigamonti@gmail.com'},
+        {id: '25103', email1: 'tornaIettiarianna@gmail.com', email2: 'carlo@cdcomo.it'},
+        {id: '25101', email1: 'raffare72@gmail.com', email2: 'contim60@yahoo.it'},
+        {id: '25109', email1: 'elena@elenarenzi.com', email2: 'francesco.pizzala@libero.it'},
+        {id: '25097', email1: 'denise.provenzano13@hotmail.com', email2: 'oropallochristian.n1@gmail.com'},
+        {id: '25102', email1: 'moni.casartelli@gmail.com', email2: 'roberto67.califano@gmail.com'},
+        {id: '25098', email1: 'ettorino.pdl@gmail.com', email2: 'michele.moltrasio@gabelgroup.com'},
+        {id: '25114', email1: 'ritasanfilippo@gmail.com', email2: 'riccardo.laureri@gmail.com'},
+        {id: '25112', email1: 'zhanghekatia@gmail.com', email2: '704607648@qq.com'},
+        {id: '25111', email1: 'ettorino.pdl@gmail.com', email2: 'michele.moltrasio@gabelgroup.com'},
+        {id: '25117', email1: 'sarita.cain@gmail.com', email2: 'giuseppe.fossati@icloud.com'},
+        {id: '25124', email1: 'soniasbarra@libero.it', email2: 'doc.schettino@gmail.com'},
+        {id: '25119', email1: 'crispa.969@gmail.com', email2: 'm.croci967@gmail.com'},
+        {id: '25123', email1: 'serenella.palomba@gmail.com', email2: 'giulia.baroni@puntocometa.org'},
+        {id: '25128', email1: 'fparisi78@gmail.com', email2: 'antonio.giardini@tiscali.it'},
+        {id: '25138', email1: 'r_bollini@yahoo.it', email2: 'vincenzo.zaccara@gmail.com'},
+        {id: '25137', email1: 'ntunesi79@gmail.com', email2: 'guattacesconeandrea@gmail.com'},
+        {id: '25141', email1: 'paola.sonzogni@gmail.com', email2: 'francesco_messina3@yahoo.it'},
+        {id: '25150', email1: 'sil74cap@gmail.com', email2: 'stefano.notari@libero.it'},
+        {id: '25152', email1: 'governatori1979@gmail.com', email2: 'rlaterza77@gmail.com'},
+        {id: '25142', email1: 'silviabulian@gmail.com', email2: 'fabrizio2girola@gmail.com'},
+        {id: '25146', email1: 'amministrazione@carihon.it', email2: 'corradofrigerio77@gmail.com'},
+        {id: '25153', email1: 'alessandragreggio@tiscali.it', email2: 'anselmo.guizzi@alaguizzi.it'},
+        {id: '25156', email1: 'giuseppecartolano@yahoo.it', email2: 'tatykuz84@gmail.com'},
+        {id: '25161', email1: 'mirella.ebainetti@puntocometa.org', email2: 'llivraghi70@gmail.com'},
+        {id: '25163', email1: 'francesca.pusterla@icloud.com', email2: 'elia.pusterla@icloud.com'},
+        {id: '25164', email1: 'francesca.pusterla@icloud.com', email2: 'elia.pusterla@icloud.com'},
+        {id: '25165', email1: 'francesca.pusterla@icloud.com', email2: 'elia.pusterla@icloud.com'},
+        {id: '25166', email1: 'stefania.zanotti00@gmail.com', email2: 'filippo.cervi@gmail.com'},
+        {id: '25167', email1: 'valentina.meroni86@gmail.com', email2: 'massimo@sala-group.it'},
+        {id: '25176', email1: 'ileanalaudani@gmail.com', email2: 'samuel.ligama@gmail.com'},
+        {id: '25174', email1: 'garlatigaia@gmail.com', email2: 'selva.mauro@tiscali.it'},
+        {id: '25183', email1: 'canepaelisa@yahoo.com', email2: 'maestro.arrigo@yahoo.it'},
+        {id: '25178', email1: 'fede.maspero@gmail.com', email2: 'zani.matt@gmail.com'},
+        {id: '25181', email1: 'federica@studiolegaledelloca.it', email2: 'idraulico@butti1934.it'},
+        {id: '25184', email1: 'ggallotti@gmail.com', email2: 'lschiavio@gmail.com'},
+        {id: '25186', email1: 'elena.leonardi@jas.com', email2: 'stefano.costa@jas.com'},
+        {id: '25182', email1: 'francesca.barattini@doc.orsoline.it', email2: 'geomalessandrofucilli@gmail.com'},
+        {id: '25192', email1: 'chiara.vignali@gmail.com', email2: 'enricofigini@gmail.com'},
+        {id: '25197', email1: 'alinamaria.griga@gmail.com', email2: 'tstef75@gmail.com'},
+        {id: '25203', email1: 'e.cittadini@rigamonti.it', email2: 'b.rigamonti@rigamonti.it'},
+        {id: '25202', email1: 'PIETRO.CARANGELO71@GMAIL.COM', email2: 'DAYANA.CARACCIOLI@HOTMAIL.IT'},
+        {id: '25201', email1: 'brennagiulia@hotmail.it', email2: 'marco.ceramella@icloud.com'},
+        {id: '25206', email1: 'avv.emma.romano@gmail.com', email2: 'mgrassotti75@gmail.com'},
+        {id: '25209', email1: 'matilde.anceschi@gmail.com', email2: 'contistefano87@gmail.com'},
+        {id: '25208', email1: 'linazippo@gmail.com', email2: 'frasca_blevio@hotmail.it'},
+        {id: '25204', email1: 'cortivalentina.3@gmail.com', email2: 'alexduca99@yahoo.it'},
+        {id: '25207', email1: 'mc.giunta@hotmail.com', email2: 'dtummino@hotmail.it'},
+        {id: '25220', email1: 'desimoneanto@hotmail.com', email2: 'lorenzo.angelinetta@gmail.com'},
+        {id: '25232', email1: 'chiara.airoldi87@gmail.com', email2: 'andrea.valsecchi1986@gmail.com'},
+        {id: '25228', email1: 'giulio.nociforo@alice.it', email2: 'rosbertolio@yahoo.it'},
+        {id: '25233', email1: 'MANZONISTE@GMAIL.COM', email2: '2671GMT@GMAIL.COM'},
+        {id: '25226', email1: 'ac@cantaluppitavernerio.com', email2: 'alessiacattaneo86@gmail.com'},
+        {id: '25230', email1: 'r.testa1986@gmail.com', email2: 'pezzati.alessandro@gmail.com'},
+        {id: '25223', email1: 'sabrina.agnetti80@gmail.com', email2: 'dariocorbella.como@gmail.com'},
+        {id: '25234', email1: 'corradofrigerio77@gmail.com', email2: 'paty_animamia@yahoo.it'},
+        {id: '25236', email1: 'iole.gre@gmail.com', email2: 'carminedaloia87@gmail.com'},
+        {id: '25238', email1: 'plamossi@gmail.com', email2: 'LAURACATENA1973@MSN.COM'},
+        {id: '25248', email1: 'fedecarta87@hotmail.it', email2: 'giacomo.bassotti@gmail.com'},
+        {id: '25250', email1: 'nadia.pretini@gmail.com', email2: 'fox_tex@yahoo.it'},
+        {id: '25244', email1: 'FEDEMOLTE@GMAIL.COM', email2: 'MAXMAGISTRONI@GMAIL.COM'},
+        {id: '25247', email1: 'elisascopelliti@hotmail.com', email2: 'anton.re73@icloud.com'},
+        {id: '25242', email1: 'daniela.caminada80@gmail.com', email2: 'federico@avvrobertodotti.it'},
+        {id: '25245', email1: 'STEFANIA.CARRARA78@GMAIL.COM', email2: 'OTTICA.VILLA@TISCALINET.IT'},
+        {id: '25246', email1: 'INFO@NUOVAMGS.IT', email2: 'cinziat1974@gmail.com'},
+        {id: '25210', email1: 'consonni.s@gmail.com', email2: 'm.gerosa@gmail.com'},
+        {id: '25259', email1: 'gianluca_dezordi@yahoo.com', email2: 'deliabastiani@libero.it'},
+        {id: '25215', email1: 'simona.martegani@gmail.com', email2: 'maggi.simone2021@gmail.com'},
+        {id: '25216', email1: 'carlottapistoletti@gmail.com', email2: 'lucadanieli83@gmail.com'},
+        {id: '25211', email1: 'angelapoletti1@gmail.com', email2: 'francogaleano1@gmail.com'},
+        {id: '25218', email1: 'silvia.mormina@puntocometa.org', email2: 'luca.scarano@cometaformazione.org'},
+        {id: '25222', email1: 'lucia_cacciapuoti@virgilio.it', email2: 'tony.izzo13@virgilio.it'},
+        {id: '25213', email1: 'frigerio.francesca40@gmail.com', email2: 'frigerio.francesca40@gmail.com'},
+        {id: '25217', email1: 'luisa.pattaro@gmail.com', email2: 'alessandro.nespoli@nespoligroup.com'},
+        {id: '25212', email1: 'francesco.ceruti@gmail.com', email2: 'AVV.ANNA.SANFELICE@GMAIL.COM'},
+        {id: '25225', email1: 'cervino@cartoccistrade.it', email2: 'fluxi54@virgilio.it'},
+        {id: '25270', email1: 'zumbulidze_evija@inbox.lv', email2: 'teimuraz888@gmail.com'},
+        {id: '25272', email1: 'dianarosa.ita@gmail.com', email2: 'jfbarone@live.com'},
+        {id: '25266', email1: 'aimepietro@yahoo.it', email2: 'alexsam3363@gmail.com'},
+        {id: '25271', email1: 'dianarosa.ita@gmail.com', email2: 'jfbarone@live.com'},
+        {id: '25237', email1: 'INA_INA441@YAHOO.COM', email2: 'DEPETRACOM@LIVE.COM'},
+        {id: '25274', email1: 'lartecura@gmail.com', email2: 'folcioserramenti@outlook.it'},
+        {id: '25276', email1: 'ISABELLA.BOARIN@GMAIL.COM', email2: 'TEO.CASTELLI@TISCALI.IT'},
+        {id: '25224', email1: 'ilariapedruzzi@yahoo.it', email2: 'a_perego@hotmail.com'},
+        {id: '25219', email1: 'tecla.bertacco@gmail.com', email2: 'giovannifigini@gmail.com'},
+        {id: '25275', email1: 'katiastellato@tiscali.it', email2: '8618@tiscali.it'},
+        {id: '25273', email1: 'dianarosa.ita@gmail.com', email2: 'jfbarone@live.com'},
+        {id: '25279', email1: 'perpi1982@gmail.com', email2: 'perpi78@gmail.com'},
+        {id: '25240', email1: 'FELIX.ILARY@ALICE.IT', email2: 'FELIX.ILARY57@GMAIL.COM'},
+        {id: '25235', email1: 'manzoniste@gmail.com', email2: '2671gmt@gmail.com'},
+        {id: '25284', email1: 'loredana.massaro76@gmail.com', email2: 'antonio.massaro@bluewin.ch'},
+        {id: '25282', email1: 'sarinacatalano@gmail.com', email2: 'nico7abaldi@gmail.com'},
+        {id: '25243', email1: 'sabrina.comperti@gmail.com', email2: 'marcello.terraneo@gmail.com'},
+        {id: '25278', email1: 'giovanna.tessiljet@gmail.com', email2: 'christian.tessiljet@gmail.com'},
+        {id: '25285', email1: 'evaillesova2@gmail.com', email2: 'l.banchiero@gmail.com'},
+        {id: '25254', email1: 'alberto.dubuis@gmail.com', email2: 'blackcatwhitecat@yandex.ru'},
+        {id: '25252', email1: 'marsidabraho7@gmail.com', email2: 'mirkocomo85@outlook.it'},
+        {id: '25249', email1: 'inga.inga22@gmail.com', email2: 'alexpastor22@hotmail.com'},
+        {id: '25261', email1: 'nicholas@dapietro1955.it', email2: 'menoir1997@gmail.com'},
+        {id: '25255', email1: 'moniferrario78@gmail.com', email2: 'pozzoliandrea@yahoo.it'},
+        {id: '25287', email1: 'togo10@me.com', email2: 'lenashynhk@gmail.com'},
+        {id: '25286', email1: 'togo10@me.com', email2: 'lenashynhk@gmail.com'},
+        {id: '25291', email1: 'giorgia_1987@hotmail.it', email2: 'enricobazzano@gmail.com'},
+        {id: '25293', email1: 'kungalovakatya@gmail.com', email2: 'arrigosas@gmail.com'},
+        {id: '25295', email1: 'ida.battaglia@interhome.group', email2: 's.manzolini@virgilio.it'},
+        {id: '25298', email1: 'POPSYIT@YAHOO.COM', email2: 'gace73@hotmail.com'},
+        {id: '25253', email1: 'stefanolevisgg@gmail.com', email2: 'INMACULADA.GASULL@ZEGNA.COM'},
+        {id: '25301', email1: 'maragiorgianni95@gmail.com', email2: 'gio.ferrone@gmail.com'},
+        {id: '25303', email1: 'radmilamagazin73@gmail.com', email2: 'filippoaiello72@gmail.com'},
+        {id: '25304', email1: 'luana.menza@asst-lariana.it', email2: 'julio.hernandez@libero.it'},
+        {id: '25312', email1: 'patrizia.giachetto@yahoo.it', email2: 'giorgio@reggimenti.it'},
+        {id: '25313', email1: 'rodigarimassimo@gmail.com', email2: 'eleonoracarelliz@gmail.com'},
+        {id: '25307', email1: 'lisa.laterza@gmail.com', email2: 'mr.boudemagh@gmail.com'},
+        {id: '25315', email1: 'fra.m91@hotmail.it', email2: 'sbrah@hotmail.it'},
+        {id: '25311', email1: 'annalisa.castelletti@gmail.com', email2: 'studiobr.sas@gmail.com'},
+        {id: '25314', email1: 'FIORELLAMUSCIONICO@GMAIL.COM', email2: 'CARLO.BALDASSARRI@VIRGILIO.IT'},
+        {id: '25318', email1: 'formenti.chiara77@gmail.com', email2: 'lucazambolin@virgilio.it'},
+        {id: '25324', email1: 'rossellazambotti@hotmail.it', email2: 'clatavera@tiscali.it'},
+        {id: '25332', email1: 'mirella.molteni@gmail.com', email2: 'paolo.rusconi@gmail.com'},
+        {id: '25368', email1: 'infoipole@gmail.com', email2: 'mauroquick@icloud.com'},
+        {id: '25374', email1: 'thomas.contin@pm.me', email2: 'ste.vollero@gmail.com'},
+        {id: '25398', email1: 'arch.laureti@libero.it', email2: 'aquilini.p@gmail.com'},
+        {id: '25360', email1: 'maricafrigerio@outlook.com', email2: 'matteoboleso@gmail.com'},
+        {id: '25389', email1: 'thomas.contin@pm.me', email2: 'ste.vollero@gmail.com'},
+        {id: '25390', email1: 'GENNARO15669@LIBERO.IT', email2: 'NATALIA_NG@LIBERO.IT'}
+    ];
+
+    // UNISCO I DUE DATABASE (senza duplicati)
+    const database = [...databaseOriginale, ...databaseNuovo];
+    
+    // Rimuovi eventuali duplicati basati sull'ID
+    const uniqueDatabase = [];
+    const ids = new Set();
+    
+    database.forEach(record => {
+        if (!ids.has(record.id)) {
+            ids.add(record.id);
+            uniqueDatabase.push(record);
+        }
+    });
+
+    console.log(`Database unito: ${uniqueDatabase.length} records (${databaseOriginale.length} + ${databaseNuovo.length})`);
 
     const hackConsole = document.getElementById('hackConsole');
     const resultArea = document.getElementById('resultArea');
     const searchInput = document.getElementById('searchInput');
+    const recordCountSpan = document.getElementById('recordCount');
+
+    // Aggiorna contatore
+    recordCountSpan.textContent = uniqueDatabase.length;
 
     function clearConsole() {
         hackConsole.innerHTML = '';
@@ -333,41 +750,36 @@
         hackConsole.scrollTop = hackConsole.scrollHeight;
     }
 
-    // Estrae il dominio da un'email
     function extractDomain(email) {
         const match = email.match(/@([^\s]+)/);
         return match ? match[1].toLowerCase() : '';
     }
 
-    // Ricerca per nome, cognome o parte di email (con gestione punti)
     function searchByNameOrEmail(searchTerm) {
         const term = searchTerm.toLowerCase().replace(/\./g, '\\.');
         const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         
-        return database.filter(user => 
+        return uniqueDatabase.filter(user => 
             regex.test(user.email1) || 
             regex.test(user.email2) ||
             regex.test(user.id)
         );
     }
 
-    // Ricerca per dominio esatto
     function searchByDomain(domain) {
         const cleanDomain = domain.replace('@', '').toLowerCase().trim();
-        return database.filter(user => 
+        return uniqueDatabase.filter(user => 
             extractDomain(user.email1) === cleanDomain || 
             extractDomain(user.email2) === cleanDomain
         );
     }
 
-    // Mostra statistiche per dominio
     function showDomainStats(domain) {
         const users = searchByDomain(domain);
         const cleanDomain = domain.replace('@', '');
         
         if (users.length === 0) return null;
         
-        // Raccogli email uniche per statistica
         const emails = new Set();
         users.forEach(u => {
             if (extractDomain(u.email1) === cleanDomain) emails.add(u.email1);
@@ -381,7 +793,6 @@
         };
     }
 
-    // Simulazione hacking con fasi
     function startHackingSimulation(query, searchType, domainStats = null) {
         clearConsole();
         
@@ -390,26 +801,26 @@
             { text: '[*] Target: registro.orsoline.it:443', delay: 200 },
             { text: `[*] Query: "${query}"`, delay: 400 },
             { text: `[*] Search type: ${searchType}`, delay: 600 },
-            { text: '[*] Connecting to database...', delay: 800 },
-            { text: '[+] Connection established', delay: 1000 },
-            { text: '[*] Bypassing security layers...', delay: 1200 },
-            { text: '[+] WAF bypassed', delay: 1500 },
-            { text: '[*] Injecting search pattern...', delay: 1800 },
-            { text: '[*] Extracting matching records...', delay: 2100 }
+            { text: `[*] Database records: ${uniqueDatabase.length}`, delay: 800 },
+            { text: '[*] Connecting to database...', delay: 1000 },
+            { text: '[+] Connection established', delay: 1200 },
+            { text: '[*] Bypassing security layers...', delay: 1400 },
+            { text: '[+] WAF bypassed', delay: 1700 },
+            { text: '[*] Injecting search pattern...', delay: 2000 },
+            { text: '[*] Extracting matching records...', delay: 2300 }
         ];
 
         phases.forEach(phase => {
             setTimeout(() => addLine(phase.text), phase.delay);
         });
 
-        // Mostra risultati dopo 2.5 secondi
         setTimeout(() => {
             if (searchType === 'dominio' && domainStats) {
                 showDomainResults(query, domainStats);
             } else {
                 performSearch(query);
             }
-        }, 2500);
+        }, 2600);
     }
 
     function performSearch(query) {
@@ -419,7 +830,6 @@
         resultArea.style.display = 'none';
         resultArea.innerHTML = '';
 
-        // CASO 1: Ricerca per dominio (@ qualcosa)
         if (trimmed.includes('@')) {
             const domainStats = showDomainStats(trimmed);
             if (domainStats) {
@@ -432,11 +842,10 @@
             return;
         }
 
-        // CASO 2: ID o username (dedaloroma + numero o solo numero)
         const idMatch = trimmed.match(/(?:dedaloroma)?(\d{5,6})/i);
         if (idMatch) {
             const searchId = idMatch[1];
-            const user = database.find(u => u.id === searchId);
+            const user = uniqueDatabase.find(u => u.id === searchId || u.id === parseInt(searchId).toString());
             
             resultArea.style.display = 'block';
             
@@ -455,7 +864,6 @@
             return;
         }
 
-        // CASO 3: Ricerca per nome/cognome (testuale)
         const results = searchByNameOrEmail(trimmed);
         
         resultArea.style.display = 'block';
@@ -463,13 +871,17 @@
         if (results.length > 0) {
             let html = `<div class="result-line success">[+] TROVATI ${results.length} RISULTATI per "${trimmed}":</div>`;
             
-            results.forEach(user => {
+            results.slice(0, 50).forEach(user => {  // Limita a 50 risultati per performance
                 html += `
                     <div class="result-line">→ dedaloroma${user.id}</div>
                     <div class="result-line email-found">  📧 ${user.email1}</div>
                     <div class="result-line email-found">  📧 ${user.email2}</div>
                 `;
             });
+            
+            if (results.length > 50) {
+                html += `<div class="result-line">... e altri ${results.length - 50} risultati</div>`;
+            }
             
             resultArea.innerHTML = html;
             addLine(`[+] Trovati ${results.length} risultati per "${trimmed}"`, 'success');
@@ -488,7 +900,7 @@
             <div class="domain-stats">📧 Email uniche: ${stats.uniqueEmails}</div>
         `;
         
-        stats.users.forEach(user => {
+        stats.users.slice(0, 30).forEach(user => {
             html += `
                 <div class="result-line">→ dedaloroma${user.id}</div>
                 <div class="result-line email-found">  📧 ${user.email1}</div>
@@ -496,11 +908,14 @@
             `;
         });
         
+        if (stats.users.length > 30) {
+            html += `<div class="result-line">... e altri ${stats.users.length - 30} utenti</div>`;
+        }
+        
         resultArea.innerHTML = html;
         addLine(`[+] Trovati ${stats.count} utenti con dominio ${domain}`, 'success');
     }
 
-    // Event listener
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const query = searchInput.value.trim();
@@ -508,12 +923,10 @@
 
             resultArea.style.display = 'none';
             
-            // Determina tipo di ricerca
             let searchType = 'testuale';
             if (query.includes('@')) searchType = 'dominio';
             else if (query.match(/\d{5,6}/)) searchType = 'ID';
             
-            // Pre-calcola statistiche dominio se necessario
             let domainStats = null;
             if (searchType === 'dominio') {
                 domainStats = showDomainStats(query);
@@ -524,10 +937,11 @@
     });
 
     // Welcome message
-    addLine('[+] Sistema pronto. Inserisci:');
-    addLine('[+] • dedaloroma130774 o 130776 (ricerca per ID)');
-    addLine('[+] • Nome o cognome (es. "daniela" o "carosi")');
-    addLine('[+] • @dominio (es. "@gmail.com" o "@libero.it")');
+    addLine('[+] Sistema pronto. Database unito:', 'success');
+    addLine(`[+] Records originali: ${databaseOriginale.length}`, 'info');
+    addLine(`[+] Records nuovi: ${databaseNuovo.length}`, 'info');
+    addLine(`[+] Totale: ${uniqueDatabase.length} records unici`, 'success');
+    addLine('[+] Inserisci: dedaloroma + ID, nome, cognome o @dominio');
 </script>
 </body>
 </html>
