@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dedaloroma · dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 15px;
+            color: #1d1d1f;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e8e8ed;
+            padding-bottom: 1.2rem;
+        }
+
+        .title {
+            font-weight: 500;
+            font-size: 1.6rem;
+            letter-spacing: -0.02em;
+            color: #000;
+        }
+
+        .username-badge {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            background: #f0f0f5;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            color: #333;
+            border: 1px solid #d9d9e3;
+        }
+
+        .search-section {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .search-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #6e6e73;
+        }
+
+        .search-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        #usernameInput {
+            flex: 2;
+            min-width: 260px;
+            background: white;
+            border: 1px solid #d2d2d7;
+            border-radius: 40px;
+            padding: 0.8rem 1.4rem;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        #usernameInput:focus {
+            border-color: #000;
+        }
+
+        button {
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 0.8rem 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #222;
+        }
+
+        .profile-card {
+            background: #fafafc;
+            border: 1px solid #efeff1;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            color: #000;
+            margin-bottom: 0.3rem;
+        }
+
+        .student-class {
+            color: #6e6e73;
+            background: #fff;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #e0e0e5;
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: #fafafc;
+            border: 1px solid #efeff1;
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 500;
+            color: #000;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6e6e73;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card {
+            background: #fafafc;
+            border: 1px solid #efeff1;
+            border-radius: 20px;
+            padding: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            background: #f5f5fa;
+            border-color: #d9d9e3;
+            transform: translateY(-1px);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .card-title {
+            font-weight: 500;
+            font-size: 1rem;
+            color: #000;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-sub {
+            font-size: 0.85rem;
+            color: #6e6e73;
+        }
+
+        /* Modal per dettagli */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #000;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6e6e73;
+            padding: 0.5rem;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Item cards nei modali */
+        .item-card {
+            background: #fafafc;
+            border: 1px solid #efeff1;
+            border-radius: 16px;
+            padding: 1.2rem;
+        }
+
+        .item-title {
+            font-weight: 500;
+            font-size: 1rem;
+            color: #000;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: #6e6e73;
+        }
+
+        .item-badge {
+            background: #fff;
+            border: 1px solid #e0e0e5;
+            border-radius: 40px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .item-desc {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #e8e8ed;
+            color: #1d1d1f;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .item-voto {
+            display: inline-block;
+            font-weight: 600;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            background: #e6f7e6;
+            border: 1px solid #a5d6a5;
+            color: #166534;
+        }
+
+        .item-nota-badge {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6e6e73;
+        }
+
+        footer {
+            margin-top: 2rem;
+            border-top: 1px solid #e8e8ed;
+            padding-top: 1rem;
+            text-align: right;
+            color: #a1a1a6;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">📊 dashboard</div>
+        <div class="username-badge" id="displayUsername">dedaloroma???</div>
+    </div>
+
+    <div class="search-section">
+        <div class="search-label">username</div>
+        <div class="search-row">
+            <input type="text" id="usernameInput" placeholder="dedaloroma130774" value="dedaloroma130774">
+            <button id="fetchBtn">cerca</button>
+        </div>
+    </div>
+
+    <div id="statusArea" style="display: none; text-align: center; padding: 1rem; color: #666;">caricamento...</div>
+    <div id="errorArea" style="display: none; text-align: center; padding: 1rem; color: #b91c1c;"></div>
+
+    <!-- Profilo -->
+    <div id="profileContainer" style="display: none;">
+        <div class="profile-card">
+            <div class="student-name" id="studentName">—</div>
+            <div class="student-class" id="studentClass">—</div>
+        </div>
+    </div>
+
+    <!-- Statistiche rapide -->
+    <div id="statsContainer" style="display: none;" class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="statVoti">0</div>
+            <div class="stat-label">voti</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statNote">0</div>
+            <div class="stat-label">note</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statAssenze">0</div>
+            <div class="stat-label">assenze</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statRitardi">0</div>
+            <div class="stat-label">ritardi</div>
+        </div>
+    </div>
+
+    <!-- Link alle sezioni -->
+    <div id="linksContainer" style="display: none;" class="cards-grid">
+        <a href="#" class="card-link" onclick="showSection('voti'); return false;">
+            <div class="card">
+                <div class="card-icon">📝</div>
+                <div class="card-title">voti</div>
+                <div class="card-sub" id="votiCount">0</div>
+            </div>
+        </a>
+        <a href="#" class="card-link" onclick="showSection('note'); return false;">
+            <div class="card">
+                <div class="card-icon">⚠️</div>
+                <div class="card-title">note disciplinari</div>
+                <div class="card-sub" id="noteCount">0</div>
+            </div>
+        </a>
+        <a href="#" class="card-link" onclick="showSection('assenze'); return false;">
+            <div class="card">
+                <div class="card-icon">📅</div>
+                <div class="card-title">assenze</div>
+                <div class="card-sub" id="assenzeCount">0</div>
+            </div>
+        </a>
+        <a href="#" class="card-link" onclick="showSection('ritardi'); return false;">
+            <div class="card">
+                <div class="card-icon">⏰</div>
+                <div class="card-title">ritardi/uscite</div>
+                <div class="card-sub" id="ritardiCount">0</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Modal per i dettagli -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle"></span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div id="modalContent" class="modal-content"></div>
+        </div>
+    </div>
+
+    <footer>registro orsoline · dati in tempo reale</footer>
+</div>
+
+<script>
+    // DOM elements
+    const usernameInput = document.getElementById('usernameInput');
+    const fetchBtn = document.getElementById('fetchBtn');
+    const displayUsername = document.getElementById('displayUsername');
+    const statusArea = document.getElementById('statusArea');
+    const errorArea = document.getElementById('errorArea');
+    const profileContainer = document.getElementById('profileContainer');
+    const studentName = document.getElementById('studentName');
+    const studentClass = document.getElementById('studentClass');
+    const statsContainer = document.getElementById('statsContainer');
+    const statVoti = document.getElementById('statVoti');
+    const statNote = document.getElementById('statNote');
+    const statAssenze = document.getElementById('statAssenze');
+    const statRitardi = document.getElementById('statRitardi');
+    const linksContainer = document.getElementById('linksContainer');
+    const votiCount = document.getElementById('votiCount');
+    const noteCount = document.getElementById('noteCount');
+    const assenzeCount = document.getElementById('assenzeCount');
+    const ritardiCount = document.getElementById('ritardiCount');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+
+    // Data storage
+    let currentData = {
+        studente: null,
+        voti: [],
+        assenze: [],
+        note: []
+    };
+
+    const AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImRlZGFsb3JvbWExMzA3NzQiLCJuYW1laWQiOiJkZWRhbG9yb21hMTMwNzc0IiwiY2xpZW50ZSI6IkRlZGFsbyIsImRpdHRhIjoiRGVkYWxvUmVnaXN0cm9XZWJSb21hIiwiY29kaWNlU3R1ZGVudGUiOiIxMzA3NzQiLCJkZXZpY2UiOiJhbmRyb2lkIiwidmVyc2lvbmVBcHAiOiIyMzEiLCJuYmYiOjE3NzMyMDgyNjcsImV4cCI6MTc3MzgxMzA2NywiaWF0IjoxNzczMjA4MjY3fQ.rJD3O_-4j5rDsaIPaxRhnCdaWS8sV_m8FL9tlYmqjow';
+
+    function extractId(username) {
+        const match = username.match(/(\d{5,})$/);
+        return match ? match[1] : null;
+    }
+
+    async function fetchDatiStudente(id) {
+        const res = await fetch('https://registro.orsoline.it/oneClickSchoolWs/api/query/esegui', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': AUTH_TOKEN
+            },
+            body: JSON.stringify({
+                nomeSP: 'SCSTUD_getDatiAlunniFamiglia',
+                SCSTUDCODI: id
+            })
+        });
+        const data = await res.json();
+        return data[0];
+    }
+
+    async function fetchVoti(id) {
+        const res = await fetch('https://registro.orsoline.it/oneClickSchoolWs/api/query/esegui', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': AUTH_TOKEN
+            },
+            body: JSON.stringify({
+                nomeSP: 'REVOTD_votiStudente',
+                studente: id,
+                materia: '',
+                tipo: '0',
+                nascondiVoti: '0',
+                periodo: 'PERI2'
+            })
+        });
+        return await res.json();
+    }
+
+    async function fetchAssenze(id) {
+        const res = await fetch('https://registro.orsoline.it/oneClickSchoolWs/api/query/esegui', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': AUTH_TOKEN
+            },
+            body: JSON.stringify({
+                nomeSP: 'REAPPE_assenzeStudente',
+                studente: id
+            })
+        });
+        return await res.json();
+    }
+
+    async function fetchNote(id) {
+        try {
+            const res = await fetch('https://registro.orsoline.it/oneClickSchoolWs/api/query/esegui', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': AUTH_TOKEN
+                },
+                body: JSON.stringify({
+                    nomeSP: 'RENODI_elencoStudente',
+                    studente: id,
+                    mese: '',
+                    materia: ''
+                })
+            });
+            
+            if (!res.ok) {
+                return [];
+            }
+            
+            return await res.json();
+        } catch (err) {
+            console.warn('Errore nel recupero note disciplinari:', err);
+            return [];
+        }
+    }
+
+    function isNota(item) {
+        return item.voto === "0" && item.tipo?.toUpperCase().startsWith('N');
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function formatOra(ora) {
+        if (!ora) return '';
+        return ora.replace('^', '°');
+    }
+
+    function updateStats() {
+        const votiNormali = currentData.voti.filter(v => !isNota(v)).length;
+        const noteVoti = currentData.voti.filter(v => isNota(v)).length;
+        const noteDisciplinari = currentData.note.length;
+        const assenzeTot = currentData.assenze.filter(a => a.tipo === 'A').length;
+        const ritardiTot = currentData.assenze.filter(a => a.tipo === 'E' || a.tipo === 'U').length;
+
+        statVoti.textContent = votiNormali;
+        statNote.textContent = noteVoti + noteDisciplinari;
+        statAssenze.textContent = assenzeTot;
+        statRitardi.textContent = ritardiTot;
+
+        votiCount.textContent = `${votiNormali} voti`;
+        noteCount.textContent = `${noteVoti + noteDisciplinari} note`;
+        assenzeCount.textContent = `${assenzeTot} assenze`;
+        ritardiCount.textContent = `${ritardiTot} eventi`;
+    }
+
+    function renderProfile() {
+        if (!currentData.studente) return;
+        studentName.textContent = currentData.studente.nominativo || '—';
+        studentClass.textContent = currentData.studente.DescClasse || '—';
+        profileContainer.style.display = 'block';
+    }
+
+    function showSection(type) {
+        modalTitle.textContent = {
+            voti: '📝 voti',
+            note: '⚠️ note disciplinari',
+            assenze: '📅 assenze',
+            ritardi: '⏰ ritardi e uscite'
+        }[type];
+
+        modalContent.innerHTML = '';
+
+        if (type === 'voti') {
+            currentData.voti.filter(v => !isNota(v)).forEach(v => {
+                modalContent.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-title">${v.materia || '—'}</div>
+                        <div class="item-meta">
+                            <span class="item-badge">${v.data || ''}</span>
+                            <span class="item-voto">${v.voto}</span>
+                            <span class="item-badge">${v.tipo || ''}</span>
+                        </div>
+                        ${v.descrizione ? `<div class="item-desc">${v.descrizione}</div>` : ''}
+                    </div>
+                `;
+            });
+        } else if (type === 'note') {
+            // Note dai voti (voto=0 e tipo N)
+            currentData.voti.filter(v => isNota(v)).forEach(v => {
+                modalContent.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-title">${v.materia || '—'}</div>
+                        <div class="item-meta">
+                            <span class="item-badge">${v.data || ''}</span>
+                            <span class="item-badge item-nota-badge">📌 nota</span>
+                            <span class="item-badge">${v.tipo || ''}</span>
+                        </div>
+                        ${v.nota ? `<div class="item-desc">${v.nota}</div>` : ''}
+                        ${v.descrizione ? `<div class="item-desc">${v.descrizione}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            // Note disciplinari da RENODI_elencoStudente
+            if (currentData.note && currentData.note.length > 0) {
+                currentData.note.forEach(n => {
+                    modalContent.innerHTML += `
+                        <div class="item-card">
+                            <div class="item-title">${n.materia || '—'}</div>
+                            <div class="item-meta">
+                                <span class="item-badge">${formatDate(n.data)}</span>
+                                <span class="item-badge">${n.docente || ''}</span>
+                                <span class="item-badge">ora ${formatOra(n.ora) || ''}</span>
+                            </div>
+                            <div class="item-desc">${n.descrizione || ''}</div>
+                        </div>
+                    `;
+                });
+            }
+        } else if (type === 'assenze') {
+            currentData.assenze.filter(a => a.tipo === 'A').forEach(a => {
+                modalContent.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-title">assenza</div>
+                        <div class="item-meta">
+                            <span class="item-badge">${a.giornoData || ''} ${formatDate(a.data)}</span>
+                            <span class="item-badge">${a.numOreAssenza || 0} ore</span>
+                        </div>
+                        ${a.motivazione && a.motivazione !== '.' ? `<div class="item-desc">${a.motivazione}</div>` : ''}
+                    </div>
+                `;
+            });
+        } else if (type === 'ritardi') {
+            currentData.assenze.filter(a => a.tipo === 'E' || a.tipo === 'U').forEach(a => {
+                modalContent.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-title">${a.tipo === 'E' ? 'ritardo' : 'uscita'}</div>
+                        <div class="item-meta">
+                            <span class="item-badge">${a.giornoData || ''} ${formatDate(a.data)}</span>
+                            <span class="item-badge">${a.ora || ''}</span>
+                        </div>
+                        ${a.motivazione && a.motivazione !== '.' ? `<div class="item-desc">${a.motivazione}</div>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        if (modalContent.innerHTML === '') {
+            modalContent.innerHTML = '<div class="empty-state">nessun dato</div>';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    window.closeModal = function() {
+        modal.style.display = 'none';
+    };
+
+    window.showSection = showSection;
+
+    async function handleFetch() {
+        const username = usernameInput.value.trim();
+        const id = extractId(username);
+        
+        if (!id) {
+            errorArea.textContent = 'username non valido';
+            errorArea.style.display = 'block';
+            return;
+        }
+
+        displayUsername.textContent = username;
+        statusArea.style.display = 'block';
+        errorArea.style.display = 'none';
+        profileContainer.style.display = 'none';
+        statsContainer.style.display = 'none';
+        linksContainer.style.display = 'none';
+
+        try {
+            const [studente, voti, assenze, note] = await Promise.all([
+                fetchDatiStudente(id),
+                fetchVoti(id),
+                fetchAssenze(id),
+                fetchNote(id)
+            ]);
+
+            currentData = { studente, voti, assenze, note };
+
+            renderProfile();
+            updateStats();
+
+            statsContainer.style.display = 'grid';
+            linksContainer.style.display = 'grid';
+            statusArea.style.display = 'none';
+
+        } catch (err) {
+            statusArea.style.display = 'none';
+            errorArea.textContent = 'errore nel caricamento dei dati';
+            errorArea.style.display = 'block';
+            console.error(err);
+        }
+    }
+
+    fetchBtn.addEventListener('click', handleFetch);
+    usernameInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') handleFetch();
+    });
+
+    // Carica esempio
+    window.addEventListener('load', () => {
+        setTimeout(handleFetch, 100);
+    });
+
+    // Chiudi modal con ESC
+    window.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+</body>
+</html>
