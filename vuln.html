@@ -271,6 +271,7 @@
             border: 1px solid #efeff1;
             border-radius: 16px;
             padding: 1.2rem;
+            position: relative;
         }
 
         .item-title {
@@ -323,10 +324,97 @@
             color: #991b1b;
         }
 
+        .giustifica-btn {
+            margin-top: 1rem;
+            background: #f0f0f5;
+            border: 1px solid #d9d9e3;
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            color: #333;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .giustifica-btn:hover {
+            background: #e5e5ea;
+            border-color: #aaa;
+        }
+
+        .giustifica-form {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #e0e0e5;
+        }
+
+        .giustifica-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #d2d2d7;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+            outline: none;
+        }
+
+        .giustifica-input:focus {
+            border-color: #000;
+        }
+
+        .giustifica-actions {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+        }
+
+        .giustifica-submit {
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .giustifica-cancel {
+            background: #f0f0f5;
+            border: 1px solid #d9d9e3;
+            border-radius: 40px;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
             color: #6e6e73;
+        }
+
+        .success-message {
+            background: #e6f7e6;
+            border: 1px solid #a5d6a5;
+            border-radius: 40px;
+            padding: 0.8rem 1.2rem;
+            color: #166534;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 40px;
+            padding: 0.8rem 1.2rem;
+            color: #991b1b;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
         }
 
         footer {
@@ -462,8 +550,10 @@
         assenze: [],
         note: []
     };
+    
+    let currentStudentId = null;
 
-    const AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImRlZGFsb3JvbWExMzA3NzQiLCJuYW1laWQiOiJkZWRhbG9yb21hMTMwNzc0IiwiY2xpZW50ZSI6IkRlZGFsbyIsImRpdHRhIjoiRGVkYWxvUmVnaXN0cm9XZWJSb21hIiwiY29kaWNlU3R1ZGVudGUiOiIxMzA3NzQiLCJkZXZpY2UiOiJhbmRyb2lkIiwidmVyc2lvbmVBcHAiOiIyMzEiLCJuYmYiOjE3NzMyMDgyNjcsImV4cCI6MTc3MzgxMzA2NywiaWF0IjoxNzczMjA4MjY3fQ.rJD3O_-4j5rDsaIPaxRhnCdaWS8sV_m8FL9tlYmqjow';
+    const AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImRlZGFsb3JvbWExMzA3NzQiLCJuYW1laWQiOiJkZWRhbG9yb21hMTMwNzc0IiwiY2xpZW50ZSI6IkRlZGFsbyIsImRpdHRhIjoiRGVkYWxvUmVnaXN0cm9XZWJSb21hIiwiY29kaWNlU3R1ZGVudGUiOiIxMzA3NzQiLCJkZXZpY2UiOiJhbmRyb2lkIiwidmVyc2lvbmVBcHAiOiIyMzEiLCJuYmYiOjE3NzMyNTc4MTIsImV4cCI6MTc3Mzg2MjYxMiwiaWF0IjoxNzczMjU3ODEyfQ.WEfqSsIrd38yHhfcNrgC6socWhS0htExaaqmRIyKYkk';
 
     function extractId(username) {
         const match = username.match(/(\d{5,})$/);
@@ -547,6 +637,35 @@
         }
     }
 
+    async function giustificaAssenza(studentId, data, motivazione) {
+        try {
+            const res = await fetch('https://registro.orsoline.it/oneClickSchoolWs/api/query/esegui', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': AUTH_TOKEN
+                },
+                body: JSON.stringify({
+                    nomeSP: 'REAPPE_giustifica_alunno',
+                    studente: studentId,
+                    tipo: 'A',
+                    data: data,
+                    ora: '',
+                    motivazione: motivazione
+                })
+            });
+            
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+            
+            const result = await res.json();
+            return { success: true, data: result };
+        } catch (err) {
+            return { success: false, error: err.message };
+        }
+    }
+
     function isNota(item) {
         return item.voto === "0" && item.tipo?.toUpperCase().startsWith('N');
     }
@@ -555,6 +674,15 @@
         if (!dateStr) return '';
         const d = new Date(dateStr);
         return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function formatDateForApi(dateStr) {
+        // Converte da ISO a DD/MM/YYYY
+        const d = new Date(dateStr);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 
     function formatOra(ora) {
@@ -586,6 +714,68 @@
         studentClass.textContent = currentData.studente.DescClasse || '—';
         profileContainer.style.display = 'block';
     }
+
+    function showGiustificaForm(assenza, cardElement) {
+        // Nascondi eventuali form aperti
+        const existingForm = cardElement.querySelector('.giustifica-form');
+        if (existingForm) {
+            existingForm.remove();
+            return;
+        }
+
+        const formDiv = document.createElement('div');
+        formDiv.className = 'giustifica-form';
+        
+        const dataFormattata = formatDateForApi(assenza.data);
+        
+        formDiv.innerHTML = `
+            <input type="text" class="giustifica-input" id="motivazione-${assenza.data}" placeholder="motivazione (es. malattia, visita medica...)">
+            <div class="giustifica-actions">
+                <button class="giustifica-submit" onclick="submitGiustifica('${assenza.data}', this)">giustifica</button>
+                <button class="giustifica-cancel" onclick="closeGiustificaForm(this)">annulla</button>
+            </div>
+        `;
+        
+        cardElement.appendChild(formDiv);
+    }
+
+    window.submitGiustifica = async function(data, btn) {
+        const formDiv = btn.closest('.giustifica-form');
+        const input = formDiv.querySelector('.giustifica-input');
+        const motivazione = input.value.trim();
+        const card = formDiv.closest('.item-card');
+        
+        if (!motivazione) {
+            alert('inserisci una motivazione');
+            return;
+        }
+
+        // Disabilita il bottone durante l'invio
+        btn.disabled = true;
+        btn.textContent = 'invio...';
+
+        const dataFormattata = formatDateForApi(data);
+        const result = await giustificaAssenza(currentStudentId, dataFormattata, motivazione);
+
+        // Rimuovi il form
+        formDiv.remove();
+
+        // Mostra messaggio di risultato
+        const messageDiv = document.createElement('div');
+        messageDiv.className = result.success ? 'success-message' : 'error-message';
+        messageDiv.textContent = result.success ? '✅ assenza giustificata con successo' : `❌ errore: ${result.error}`;
+        card.appendChild(messageDiv);
+
+        // Rimuovi il messaggio dopo 3 secondi
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    };
+
+    window.closeGiustificaForm = function(btn) {
+        const formDiv = btn.closest('.giustifica-form');
+        formDiv.remove();
+    };
 
     function showSection(type) {
         modalTitle.textContent = {
@@ -646,16 +836,30 @@
             }
         } else if (type === 'assenze') {
             currentData.assenze.filter(a => a.tipo === 'A').forEach(a => {
-                modalContent.innerHTML += `
-                    <div class="item-card">
-                        <div class="item-title">assenza</div>
-                        <div class="item-meta">
-                            <span class="item-badge">${a.giornoData || ''} ${formatDate(a.data)}</span>
-                            <span class="item-badge">${a.numOreAssenza || 0} ore</span>
-                        </div>
-                        ${a.motivazione && a.motivazione !== '.' ? `<div class="item-desc">${a.motivazione}</div>` : ''}
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                
+                const hasMotivazione = a.motivazione && a.motivazione !== '.' && a.motivazione !== '';
+                
+                card.innerHTML = `
+                    <div class="item-title">assenza</div>
+                    <div class="item-meta">
+                        <span class="item-badge">${a.giornoData || ''} ${formatDate(a.data)}</span>
+                        <span class="item-badge">${a.numOreAssenza || 0} ore</span>
                     </div>
+                    ${hasMotivazione ? `<div class="item-desc">${a.motivazione}</div>` : ''}
                 `;
+
+                // Se non c'è motivazione, aggiungi bottone giustifica
+                if (!hasMotivazione) {
+                    const btnDiv = document.createElement('div');
+                    btnDiv.className = 'giustifica-btn';
+                    btnDiv.innerHTML = '✏️ giustifica assenza';
+                    btnDiv.onclick = () => showGiustificaForm(a, card);
+                    card.appendChild(btnDiv);
+                }
+
+                modalContent.appendChild(card);
             });
         } else if (type === 'ritardi') {
             currentData.assenze.filter(a => a.tipo === 'E' || a.tipo === 'U').forEach(a => {
@@ -684,6 +888,7 @@
     };
 
     window.showSection = showSection;
+    window.showGiustificaForm = showGiustificaForm;
 
     async function handleFetch() {
         const username = usernameInput.value.trim();
@@ -695,6 +900,7 @@
             return;
         }
 
+        currentStudentId = id;
         displayUsername.textContent = username;
         statusArea.style.display = 'block';
         errorArea.style.display = 'none';
