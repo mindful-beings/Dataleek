@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Ricerca Studenti - Istituto S. Orsola</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #f5f7fb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem 1.5rem;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .search-box {
+            width: 100%;
+            background: white;
+            border-radius: 48px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08), 0 2px 12px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            border: 1px solid #e0e4e9;
+        }
+
+        .search-box:focus-within {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-color: #cdd3db;
+        }
+
+        .search-icon {
+            color: #8e9aaf;
+            font-size: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            padding: 16px 0;
+            background: transparent;
+            font-weight: 400;
+            color: #1f2a44;
+        }
+
+        .search-input::placeholder {
+            color: #9aa6b9;
+            font-weight: 400;
+        }
+
+        .search-hint {
+            font-size: 0.75rem;
+            color: #6c7a91;
+            margin-top: 12px;
+            margin-left: 18px;
+            letter-spacing: 0.2px;
+        }
+
+        .results-area {
+            width: 100%;
+            max-width: 1200px;
+            margin: 1.2rem auto 0;
+        }
+
+        .stats {
+            font-size: 0.85rem;
+            color: #4a5a7a;
+            margin-bottom: 1.5rem;
+            border-left: 3px solid #b0c4de;
+            padding-left: 12px;
+            background: #f0f3fa;
+            border-radius: 20px;
+            display: inline-block;
+            padding: 6px 16px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem 1.2rem 1.2rem 1.2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            border: 1px solid #eef2f8;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .student-card:hover {
+            border-color: #dce3ec;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+            background: #fefefe;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #e6edf4;
+            padding-bottom: 8px;
+        }
+
+        .student-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1e2b4f;
+            letter-spacing: -0.2px;
+        }
+
+        .student-id {
+            font-size: 0.7rem;
+            background: #eef3fc;
+            padding: 2px 8px;
+            border-radius: 40px;
+            font-family: monospace;
+            color: #2c5f8a;
+        }
+
+        .detail-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4b5a7a;
+            min-width: 95px;
+        }
+
+        .detail-value {
+            color: #1f2a48;
+            word-break: break-word;
+        }
+
+        .badge-scuola {
+            background: #f0f4fe;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-top: 6px;
+            color: #2d4f7c;
+        }
+
+        .comunicazioni {
+            margin-top: 8px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            background: #fff6e0;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: #a46f2c;
+        }
+
+        .no-results {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: #6a7b9b;
+            border: 1px solid #eef2f8;
+            font-size: 0.95rem;
+        }
+
+        footer {
+            margin-top: 2.5rem;
+            font-size: 0.7rem;
+            color: #8f9bb3;
+            text-align: center;
+        }
+
+        @media (max-width: 550px) {
+            body {
+                padding: 1.2rem;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .search-box {
+                padding: 0 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <div class="search-box">
+        <div class="search-icon">🔍</div>
+        <input type="text" class="search-input" id="searchInput" placeholder="Cerca per nome, ID studente (es. 130010) o classe (es. 1^AD, 3^BM)" autocomplete="off">
+    </div>
+    <div class="search-hint">🔎 Ricerca automatica mentre digiti — nome, cognome, ID o classe</div>
+</div>
+
+<div class="results-area" id="resultsArea">
+    <div class="stats" id="statsCounter">📚 Caricamento archivio studenti...</div>
+    <div id="resultsContainer" class="cards-grid"></div>
+</div>
+<footer>Dati anagrafici e scolastici anno 2025/2026 • Istituto Paritario S. Orsola</footer>
+
+<script>
+    // --------------------------------------------------------------
+    // DATABASE COMPLETO estratto dal file HttpIntruder_Matches
+    // Ogni entry corrisponde a uno studente (estrapolato da tutti i payload)
+    // Sono inclusi TUTTI gli studenti presenti nel file di log.
+    // --------------------------------------------------------------
+
+    const studentsRaw = [
+        // ID 11
+        { "SCSTCUSTUD": 130010, "nominativo": "Demetrio Bacherini", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 16
+        { "SCSTCUSTUD": 130015, "nominativo": "Davide Paolucci", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 24 -> 130406
+        { "SCSTCUSTUD": 130406, "nominativo": "Francesca Pezzini", "DescClasse": "3^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 3, "comunicDaLeggere": 10, "quadriennale": "" },
+        // ID 26
+        { "SCSTCUSTUD": 130025, "nominativo": "Giulia Falcone", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 2, "quadriennale": "" },
+        // ID 34 -> 130495
+        { "SCSTCUSTUD": 130495, "nominativo": "Miriam Ruggeri", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 64 -> 130442
+        { "SCSTCUSTUD": 130442, "nominativo": "Lorenzo Costa", "DescClasse": "2^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 2, "comunicDaLeggere": 10, "quadriennale": "" },
+        // ID 66
+        { "SCSTCUSTUD": 130065, "nominativo": "Bianca Cocchieri", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 68
+        { "SCSTCUSTUD": 130067, "nominativo": "Eleonora Petrone", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 3, "quadriennale": "" },
+        // ID 69
+        { "SCSTCUSTUD": 130068, "nominativo": "Chiara Vaiano", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 70
+        { "SCSTCUSTUD": 130069, "nominativo": "Beatrice Baiocchi", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 22 },
+        // ID 76 -> due studenti: Simona e Silvia Altimari
+        { "SCSTCUSTUD": 130075, "nominativo": "Simona Altimari", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 21 },
+        { "SCSTCUSTUD": 126901, "nominativo": "Silvia Altimari", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 11 },
+        // ID 77
+        { "SCSTCUSTUD": 130076, "nominativo": "Benedetta Russillo", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 94
+        { "SCSTCUSTUD": 130093, "nominativo": "Giulia Lanzi", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        // ID 97: Leonardo e Vittoria Todaro
+        { "SCSTCUSTUD": 130096, "nominativo": "Leonardo Todaro", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 18 },
+        { "SCSTCUSTUD": 126269, "nominativo": "Vittoria Maria Todaro", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 12 },
+        // ID 107
+        { "SCSTCUSTUD": 130106, "nominativo": "Francesco De Simone", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 13 },
+        // ID 115
+        { "SCSTCUSTUD": 130114, "nominativo": "Riccardo Vendittozzi", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 147
+        { "SCSTCUSTUD": 130146, "nominativo": "Edward Vicari", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 2 },
+        // ID 154
+        { "SCSTCUSTUD": 130153, "nominativo": "Valentina Vittoria Giuliani", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 3 },
+        // ID 155: Greta Mane (130262) e Elena Mane (130154)
+        { "SCSTCUSTUD": 130262, "nominativo": "Greta Mane", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 19 },
+        { "SCSTCUSTUD": 130154, "nominativo": "Elena Mane", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 13 },
+        // ID 158
+        { "SCSTCUSTUD": 130157, "nominativo": "Lucrezia Trape'", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 10 },
+        // ID 160
+        { "SCSTCUSTUD": 130606, "nominativo": "Francesco Maria Arnone", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 7 },
+        { "SCSTCUSTUD": 130159, "nominativo": "Eleonora Arnone", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 16 },
+        // ID 163
+        { "SCSTCUSTUD": 130162, "nominativo": "Chiara Salsano", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 53, "quadriennale": "" },
+        // ID 166
+        { "SCSTCUSTUD": 130165, "nominativo": "Andrea Crescenzi", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 22, "quadriennale": "" },
+        // ID 170
+        { "SCSTCUSTUD": 130169, "nominativo": "Michele Maria Mola", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 30, "quadriennale": "" },
+        // ID 173
+        { "SCSTCUSTUD": 130172, "nominativo": "Valerio Querqui", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 197: Sara Lo Bosco, Laura Lo Bosco
+        { "SCSTCUSTUD": 130483, "nominativo": "Sara Lo Bosco", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130196, "nominativo": "Laura Lo Bosco", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 198: Alessandro Fabi (130245), Eleonora Fabi (130197)
+        { "SCSTCUSTUD": 130245, "nominativo": "Alessandro Fabi", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130197, "nominativo": "Eleonora Fabi", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 199: Nicole Konda, Giorgio Konda
+        { "SCSTCUSTUD": 130620, "nominativo": "Nicole Konda", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 3 },
+        { "SCSTCUSTUD": 130198, "nominativo": "Giorgio Konda", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 10 },
+        // ID 200: Elena Casimiro, Viola Casimiro
+        { "SCSTCUSTUD": 130667, "nominativo": "Elena Casimiro", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130199, "nominativo": "Viola Casimiro", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 201: Andrea Palombini, Asia Palombini
+        { "SCSTCUSTUD": 130507, "nominativo": "Andrea Palombini", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 23 },
+        { "SCSTCUSTUD": 130200, "nominativo": "Asia Palombini", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 16 },
+        // ID 206
+        { "SCSTCUSTUD": 130205, "nominativo": "Paolo Panzarola", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 8, "quadriennale": "" },
+        // ID 211: Lucrezia, Riccardo, Damiano De Sanctis
+        { "SCSTCUSTUD": 130396, "nominativo": "Lucrezia De Sanctis", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130210, "nominativo": "Riccardo De Sanctis", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 128770, "nominativo": "Damiano De Sanctis", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 222
+        { "SCSTCUSTUD": 130221, "nominativo": "Claudio Cassano", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 18 },
+        // ID 227
+        { "SCSTCUSTUD": 130226, "nominativo": "Giulia Molinaro", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 2 },
+        // ID 229
+        { "SCSTCUSTUD": 130228, "nominativo": "Edoardo Bellani", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 10 },
+        // ID 249
+        { "SCSTCUSTUD": 130248, "nominativo": "Gioia Iorio", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 13 },
+        // ID 251
+        { "SCSTCUSTUD": 130250, "nominativo": "Matteo Montalto", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 1 },
+        // ID 255
+        { "SCSTCUSTUD": 130670, "nominativo": "Marta Figura", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130254, "nominativo": "Gabriele Figura", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 256
+        { "SCSTCUSTUD": 130438, "nominativo": "Cecilia Quaglia", "DescClasse": "2^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "quadriennale": null, "numeroClasse": 2, "comunicDaLeggere": 43 },
+        { "SCSTCUSTUD": 130255, "nominativo": "Alessandro Quaglia", "DescClasse": "4^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "quadriennale": null, "numeroClasse": 4, "comunicDaLeggere": 11 },
+        // ID 257
+        { "SCSTCUSTUD": 130256, "nominativo": "Andrea Tamburini", "DescClasse": "4^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 4, "comunicDaLeggere": 9, "quadriennale": "" },
+        // ID 261
+        { "SCSTCUSTUD": 130260, "nominativo": "Irene La Motta", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 1 },
+        // ID 262
+        { "SCSTCUSTUD": 130261, "nominativo": "Silvia Fiorelli", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 1 },
+        // ID 265
+        { "SCSTCUSTUD": 130393, "nominativo": "Tommaso Aldeghi", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 283
+        { "SCSTCUSTUD": 130282, "nominativo": "Elena Maggio", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 1 },
+        // ID 300
+        { "SCSTCUSTUD": 130299, "nominativo": "Patrizio Pini", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 8 },
+        // ID 302
+        { "SCSTCUSTUD": 130301, "nominativo": "Lavinia Oscar Cruciani", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 38 },
+        // ID 304
+        { "SCSTCUSTUD": 130303, "nominativo": "Andrea Marzocchella", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 305
+        { "SCSTCUSTUD": 130508, "nominativo": "Greta D'Aiuto", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 20 },
+        { "SCSTCUSTUD": 130304, "nominativo": "Filippo D'Aiuto", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 16 },
+        // ID 310
+        { "SCSTCUSTUD": 130309, "nominativo": "Manuel Valicchia", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 11 },
+        // ID 316
+        { "SCSTCUSTUD": 130315, "nominativo": "Benedetta Casiraghi", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 38 },
+        // ID 319
+        { "SCSTCUSTUD": 130318, "nominativo": "Caterina Miccinilli", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 1 },
+        { "SCSTCUSTUD": 128792, "nominativo": "Bianca Miccinilli", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 325
+        { "SCSTCUSTUD": 130520, "nominativo": "Davide Cherubino", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130324, "nominativo": "Dario Cherubino", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 333
+        { "SCSTCUSTUD": 130332, "nominativo": "Luca Tribalto", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 16 },
+        // ID 334
+        { "SCSTCUSTUD": 130333, "nominativo": "Viola Luz Ferrari", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 6 },
+        // ID 336
+        { "SCSTCUSTUD": 130335, "nominativo": "Anna Luna Sacchi", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 127880, "nominativo": "Lucio Sacchi", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 338
+        { "SCSTCUSTUD": 130661, "nominativo": "Gabriele Pardo", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 33 },
+        // ID 343
+        { "SCSTCUSTUD": 130342, "nominativo": "Giulia Montozzi", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 9 },
+        { "SCSTCUSTUD": 127873, "nominativo": "Leonardo Montozzi", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 1 },
+        // ID 344
+        { "SCSTCUSTUD": 130343, "nominativo": "Leonardo Mocci", "DescClasse": "3^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 3, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 345
+        { "SCSTCUSTUD": 130344, "nominativo": "Marta Elena Delfino", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 10 },
+        // ID 351
+        { "SCSTCUSTUD": 130407, "nominativo": "Alessandro Danti", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 6 },
+        // ID 352
+        { "SCSTCUSTUD": 130351, "nominativo": "Federico Rizza", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 13 },
+        { "SCSTCUSTUD": 128756, "nominativo": "Alessandro Rizza", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 12 },
+        // ID 363
+        { "SCSTCUSTUD": 130362, "nominativo": "Federico D'Onofrio", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 370
+        { "SCSTCUSTUD": 130369, "nominativo": "Davide Cirotti", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 373
+        { "SCSTCUSTUD": 130372, "nominativo": "Roberto Mattia Abatecola", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 392-393 Bucci
+        { "SCSTCUSTUD": 130392, "nominativo": "Luca Bucci", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 2 },
+        { "SCSTCUSTUD": 130391, "nominativo": "Paolo Bucci", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        // ID 395
+        { "SCSTCUSTUD": 130394, "nominativo": "Mia Matarazzo", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 9 },
+        // ID 402
+        { "SCSTCUSTUD": 130506, "nominativo": "Martina Mancuso", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 22 },
+        // ID 403
+        { "SCSTCUSTUD": 130402, "nominativo": "Martina Panatta", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 2 },
+        { "SCSTCUSTUD": 128765, "nominativo": "Leonardo Panatta", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 2 },
+        // ID 406
+        { "SCSTCUSTUD": 130405, "nominativo": "Francesco Folino", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 126212, "nominativo": "Bruno Karol Folino", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 424
+        { "SCSTCUSTUD": 130423, "nominativo": "Gabriel Fiusco", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 24 },
+        // ID 428
+        { "SCSTCUSTUD": 130427, "nominativo": "Giulia D'Amelio", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 437
+        { "SCSTCUSTUD": 130436, "nominativo": "Mauro Napoli", "DescClasse": "2^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 2, "comunicDaLeggere": 2, "quadriennale": "" },
+        // ID 438
+        { "SCSTCUSTUD": 130748, "nominativo": "Valerio Scalfidi", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130437, "nominativo": "Emanuele Scalfidi", "DescClasse": "2^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "quadriennale": null, "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 444
+        { "SCSTCUSTUD": 130443, "nominativo": "Sofia Pace", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 2 },
+        // ID 445
+        { "SCSTCUSTUD": 130549, "nominativo": "Vittoria Postacchini", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 449
+        { "SCSTCUSTUD": 130448, "nominativo": "Leandro Petillo", "DescClasse": "2^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 2, "comunicDaLeggere": 13, "quadriennale": "" },
+        // ID 452
+        { "SCSTCUSTUD": 130472, "nominativo": "Emma Folliero", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 1 },
+        // ID 462
+        { "SCSTCUSTUD": 130461, "nominativo": "Sveva Candela", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 18 },
+        // ID 463-464 Paraggio
+        { "SCSTCUSTUD": 130462, "nominativo": "Flavio Paraggio", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 26 },
+        { "SCSTCUSTUD": 130463, "nominativo": "Valerio Paraggio", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 7 },
+        // ID 465 Di Antonio
+        { "SCSTCUSTUD": 130468, "nominativo": "Gabriele Di Antonio", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 16 },
+        { "SCSTCUSTUD": 130464, "nominativo": "Giorgio Di Antonio", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 16 },
+        // ID 467
+        { "SCSTCUSTUD": 130466, "nominativo": "Gabriele Carnevali", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        // ID 468
+        { "SCSTCUSTUD": 130467, "nominativo": "Silvana Fredella", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 7 },
+        // ID 470
+        { "SCSTCUSTUD": 130469, "nominativo": "Tommaso Previsdomini", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 3 },
+        // ID 472
+        { "SCSTCUSTUD": 130742, "nominativo": "George Lin", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130471, "nominativo": "Emily Lin", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        // ID 475
+        { "SCSTCUSTUD": 130474, "nominativo": "Francesco Biasi", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 12 },
+        // ID 477
+        { "SCSTCUSTUD": 130476, "nominativo": "Leonardo Bolognesi", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 2 },
+        // ID 479
+        { "SCSTCUSTUD": 130478, "nominativo": "Denis Oliveri", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 20 },
+        // ID 485
+        { "SCSTCUSTUD": 130484, "nominativo": "Angelica Ramelli", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 2 },
+        // ID 486
+        { "SCSTCUSTUD": 130799, "nominativo": "Giacomo Lallini", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130485, "nominativo": "Gregorio Lallini", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 487
+        { "SCSTCUSTUD": 130671, "nominativo": "Ludovica Spagnuolo", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130486, "nominativo": "Amedeo Spagnuolo", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        // ID 488
+        { "SCSTCUSTUD": 130487, "nominativo": "Lorenzo Gallozzi", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 7 },
+        // ID 489
+        { "SCSTCUSTUD": 130488, "nominativo": "Elisabetta Fischetto", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 2 },
+        // ID 494
+        { "SCSTCUSTUD": 130608, "nominativo": "Christian Valentini", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 26 },
+        { "SCSTCUSTUD": 130493, "nominativo": "Diego Valentini", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 33 },
+        // ID 497
+        { "SCSTCUSTUD": 130496, "nominativo": "Ludovico Alberto Sartori", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 2 },
+        // ID 498
+        { "SCSTCUSTUD": 130497, "nominativo": "Margherita Monica", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 2 },
+        // ID 500
+        { "SCSTCUSTUD": 130499, "nominativo": "Beatrice Proietti", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 10 },
+        // ID 504
+        { "SCSTCUSTUD": 130503, "nominativo": "Corrado Ciabocco", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 505
+        { "SCSTCUSTUD": 130504, "nominativo": "Costanza Caldo", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 23 },
+        // ID 510
+        { "SCSTCUSTUD": 130509, "nominativo": "Anastasiia Marta Nestorovych", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 17 },
+        // ID 511
+        { "SCSTCUSTUD": 130510, "nominativo": "Federico Cavaliere", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 7 },
+        // ID 512
+        { "SCSTCUSTUD": 130511, "nominativo": "Vittoria Romana Galletti", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 513
+        { "SCSTCUSTUD": 130912, "nominativo": "Ginevra Bracci", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 19 },
+        { "SCSTCUSTUD": 130512, "nominativo": "Viola Bracci", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 8 },
+        // ID 514
+        { "SCSTCUSTUD": 130513, "nominativo": "Leonardo Sisci", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 10 },
+        // ID 518
+        { "SCSTCUSTUD": 130517, "nominativo": "Lavinia Lucente", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 5 },
+        // ID 523
+        { "SCSTCUSTUD": 130522, "nominativo": "Valerio Meloni", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 524
+        { "SCSTCUSTUD": 130523, "nominativo": "Viola Ceci", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 5 },
+        // ID 529
+        { "SCSTCUSTUD": 130528, "nominativo": "Samuele Camerini", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 8 },
+        // ID 532 / 533
+        { "SCSTCUSTUD": 130532, "nominativo": "Valerio Marco Ricci", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 68 },
+        // ID 535
+        { "SCSTCUSTUD": 130534, "nominativo": "Mattia Ianigro", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 31 },
+        // ID 544 / 545
+        { "SCSTCUSTUD": 130543, "nominativo": "Sophie Parrondo Narvarte", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 8 },
+        { "SCSTCUSTUD": 130544, "nominativo": "Martin Parrondo Narvarte", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 19 },
+        // ID 550 già presente come 130549, già inserito
+        // ID 551
+        { "SCSTCUSTUD": 130550, "nominativo": "Maria Chiara Giammario", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 13 },
+        // ID 552 / 553
+        { "SCSTCUSTUD": 130552, "nominativo": "Savino Trecca", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130551, "nominativo": "Riccardo Trecca", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 554
+        { "SCSTCUSTUD": 130553, "nominativo": "Asia Lepera", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 16 },
+        // ID 555
+        { "SCSTCUSTUD": 130554, "nominativo": "Giulia Barchiesi", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 19 },
+        { "SCSTCUSTUD": 130761, "nominativo": "Chiara Barchiesi", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 11 },
+        // ID 561
+        { "SCSTCUSTUD": 130640, "nominativo": "Riccardo Navarra", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130560, "nominativo": "Antonio Navarra", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 572 / 573
+        { "SCSTCUSTUD": 130571, "nominativo": "Sofia Digilio", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 4 },
+        { "SCSTCUSTUD": 130572, "nominativo": "Beatrice Digilio", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 574
+        { "SCSTCUSTUD": 130573, "nominativo": "Eleonora Salis", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 578
+        { "SCSTCUSTUD": 130577, "nominativo": "Sanuthi Speranza Delpe Wicramaarachchi", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 579
+        { "SCSTCUSTUD": 130673, "nominativo": "Angela Ricci", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 583
+        { "SCSTCUSTUD": 130582, "nominativo": "Susanna Piccarreta", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 15 },
+        // ID 584
+        { "SCSTCUSTUD": 130583, "nominativo": "Rachele Autiero", "DescClasse": "5^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 1 },
+        // ID 585
+        { "SCSTCUSTUD": 130672, "nominativo": "Riccardo Cafulli", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 15 },
+        // ID 589
+        { "SCSTCUSTUD": 130588, "nominativo": "Miriam Oggiano", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 12 },
+        // ID 590
+        { "SCSTCUSTUD": 130862, "nominativo": "Michele Mattoni", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130589, "nominativo": "Miriam Mattoni", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 592
+        { "SCSTCUSTUD": 130591, "nominativo": "Edoardo Cini", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 593
+        { "SCSTCUSTUD": 130592, "nominativo": "Leonardo Flamini", "DescClasse": "4^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 10 },
+        // ID 594
+        { "SCSTCUSTUD": 130875, "nominativo": "Agnese Tancredi", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 27 },
+        { "SCSTCUSTUD": 130593, "nominativo": "Giulia Tancredi", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 12 },
+        // ID 597 / 598
+        { "SCSTCUSTUD": 130596, "nominativo": "Flavia Corasaniti", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130597, "nominativo": "Vittoria Corasaniti", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 599
+        { "SCSTCUSTUD": 130598, "nominativo": "Carlotta Di Giacomo", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 38 },
+        // ID 600
+        { "SCSTCUSTUD": 130599, "nominativo": "Marianna Chiara Ricci", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 0 },
+        // ID 601
+        { "SCSTCUSTUD": 130600, "nominativo": "Chiara Daloiso", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 125261, "nominativo": "Francesca Daloiso", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 602
+        { "SCSTCUSTUD": 130601, "nominativo": "Elisa Pirato", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 1 },
+        // ID 603
+        { "SCSTCUSTUD": 130602, "nominativo": "Elisa Sacchi", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 14 },
+        // ID 604
+        { "SCSTCUSTUD": 130603, "nominativo": "Aurora Galli", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 5 },
+        // ID 608
+        { "SCSTCUSTUD": 130607, "nominativo": "Alessandra Martina", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 22 },
+        // ID 610
+        { "SCSTCUSTUD": 130609, "nominativo": "Vittorio Saliola", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 3 },
+        // ID 611
+        { "SCSTCUSTUD": 130610, "nominativo": "Jose' Maria Chavez Rodriguez", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 5 },
+        // ID 612
+        { "SCSTCUSTUD": 130850, "nominativo": "Daniele Bigoli", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 1 },
+        { "SCSTCUSTUD": 130611, "nominativo": "Leonardo Bigoli", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 615
+        { "SCSTCUSTUD": 130614, "nominativo": "Gabriele Montresor", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 623
+        { "SCSTCUSTUD": 130622, "nominativo": "Elisa Esposito", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 624
+        { "SCSTCUSTUD": 130623, "nominativo": "Viola Di Donato", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 13 },
+        // ID 625
+        { "SCSTCUSTUD": 130624, "nominativo": "Valerio Passeri", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 3 },
+        // ID 628
+        { "SCSTCUSTUD": 130627, "nominativo": "Giulia Barbantini", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 25 },
+        // ID 629
+        { "SCSTCUSTUD": 130628, "nominativo": "Virginia Andreucci", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 7 },
+        // ID 635
+        { "SCSTCUSTUD": 130634, "nominativo": "Gabriele Tancredi Maria Colucci", "DescClasse": "4^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 4, "comunicDaLeggere": 6, "quadriennale": "" },
+        // ID 636
+        { "SCSTCUSTUD": 130635, "nominativo": "Michele Di Silvestro", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 7, "quadriennale": "" },
+        // ID 638
+        { "SCSTCUSTUD": 130637, "nominativo": "Ludovico Sperduti", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 28 },
+        // ID 646
+        { "SCSTCUSTUD": 130645, "nominativo": "Sofia Gera", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 10 },
+        { "SCSTCUSTUD": 130918, "nominativo": "Agostino Gera", "DescClasse": "3^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "quadriennale": null, "numeroClasse": 3, "comunicDaLeggere": 5 },
+        // ID 659
+        { "SCSTCUSTUD": 130658, "nominativo": "Samuele Grano", "DescClasse": "3^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 1 },
+        // ID 660
+        { "SCSTCUSTUD": 130659, "nominativo": "Andrea Malagola", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 5 },
+        // ID 661
+        { "SCSTCUSTUD": 130660, "nominativo": "Giovanni Paolo De Rossi Frigo", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 37 },
+        // ID 664
+        { "SCSTCUSTUD": 130663, "nominativo": "Luca Di Tommaso", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 6 },
+        // ID 665
+        { "SCSTCUSTUD": 130832, "nominativo": "Martina D'Alfonsi", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130664, "nominativo": "Sofia D'Alfonsi", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 667
+        { "SCSTCUSTUD": 130816, "nominativo": "Laetitia Savarese", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130666, "nominativo": "Vittoria Savarese", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 2 },
+        // ID 669
+        { "SCSTCUSTUD": 130668, "nominativo": "Elisabetta Ferretti", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 670
+        { "SCSTCUSTUD": 130669, "nominativo": "Virginia Sofia Baldacci", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 2 },
+        // ID 677
+        { "SCSTCUSTUD": 130676, "nominativo": "Camilla Sestini", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 678
+        { "SCSTCUSTUD": 130677, "nominativo": "Iacopo Giorno", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 679
+        { "SCSTCUSTUD": 130678, "nominativo": "Carlotta Dore", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 20 },
+        // ID 680
+        { "SCSTCUSTUD": 130679, "nominativo": "Francesco Filippone", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 10, "quadriennale": "" },
+        // ID 682-683
+        { "SCSTCUSTUD": 130681, "nominativo": "Vittoria Braghettoni", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130682, "nominativo": "Giulio Braghettoni", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 684
+        { "SCSTCUSTUD": 130683, "nominativo": "Penelope Rodari", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 41, "quadriennale": "" },
+        // ID 685
+        { "SCSTCUSTUD": 130684, "nominativo": "Antonello Civitani", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 686
+        { "SCSTCUSTUD": 130685, "nominativo": "Eleonora Baffi", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 4 },
+        // ID 687
+        { "SCSTCUSTUD": 130686, "nominativo": "Federico Paesano", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 688
+        { "SCSTCUSTUD": 130687, "nominativo": "Zi Han Pan", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 26 },
+        // ID 689
+        { "SCSTCUSTUD": 130688, "nominativo": "Leonardo Pietrantoni", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 5, "quadriennale": "" },
+        // ID 690
+        { "SCSTCUSTUD": 130852, "nominativo": "Carlotta Bisegna", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 27 },
+        { "SCSTCUSTUD": 130689, "nominativo": "Ginevra Bisegna", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 31 },
+        // ID 692
+        { "SCSTCUSTUD": 130691, "nominativo": "Giorgio Zhou De Thomasis", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 7 },
+        // ID 694
+        { "SCSTCUSTUD": 130693, "nominativo": "Luna Liu", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 33 },
+        // ID 695
+        { "SCSTCUSTUD": 130694, "nominativo": "Michele Martinez Oliva", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 2 },
+        // ID 696
+        { "SCSTCUSTUD": 130695, "nominativo": "Cecilia Paoletti", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 697
+        { "SCSTCUSTUD": 130696, "nominativo": "Penelope Tancredi", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 7, "quadriennale": "" },
+        // ID 698
+        { "SCSTCUSTUD": 130697, "nominativo": "Marta Cavaniglia", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 20 },
+        // ID 699
+        { "SCSTCUSTUD": 130698, "nominativo": "Ludovica Gianni", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 5 },
+        // ID 700
+        { "SCSTCUSTUD": 130890, "nominativo": "Eva Di Lanzo", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 10 },
+        { "SCSTCUSTUD": 130699, "nominativo": "Edoardo Di Lanzo", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 15 },
+        // ID 701
+        { "SCSTCUSTUD": 130700, "nominativo": "Francesca Jana Ferri", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 6 },
+        // ID 702
+        { "SCSTCUSTUD": 130701, "nominativo": "Veronica Gabrielli", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 25 },
+        // ID 703
+        { "SCSTCUSTUD": 130702, "nominativo": "Leonardo Demrozi Di Paride", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 19 },
+        // ID 704
+        { "SCSTCUSTUD": 130703, "nominativo": "Bianca Iris Dell'Otto", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 66 },
+        // ID 705
+        { "SCSTCUSTUD": 130704, "nominativo": "Sara Dominicis", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 3 },
+        // ID 706
+        { "SCSTCUSTUD": 130705, "nominativo": "Jiaqi Hellen Lin", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 53 },
+        // ID 707
+        { "SCSTCUSTUD": 130706, "nominativo": "Camilla Moretti", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 708
+        { "SCSTCUSTUD": 130707, "nominativo": "Joyce Huang", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 12 },
+        // ID 709
+        { "SCSTCUSTUD": 130708, "nominativo": "Chiara Dori", "DescClasse": "3^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 3, "comunicDaLeggere": 3, "quadriennale": "" },
+        // ID 710
+        { "SCSTCUSTUD": 130838, "nominativo": "Edoardo Saladino Ferraiuolo", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130709, "nominativo": "Riccardo Saladino Ferraiuolo", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 711
+        { "SCSTCUSTUD": 130710, "nominativo": "Vittoria Rischia", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 18 },
+        // ID 714
+        { "SCSTCUSTUD": 130713, "nominativo": "Sofia Bignotti", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 66 },
+        // ID 718
+        { "SCSTCUSTUD": 130717, "nominativo": "Giorgio Freda", "DescClasse": "3^BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 11 },
+        // ID 722
+        { "SCSTCUSTUD": 130721, "nominativo": "Francesco Magni", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 20 },
+        // ID 724
+        { "SCSTCUSTUD": 130723, "nominativo": "Flaminia Rosanna Lionetti", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 23, "quadriennale": "" },
+        // ID 725
+        { "SCSTCUSTUD": 130724, "nominativo": "Riccardo Tobia", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 726
+        { "SCSTCUSTUD": 130725, "nominativo": "Gaia De Angelis", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 34, "quadriennale": "" },
+        // ID 727
+        { "SCSTCUSTUD": 130726, "nominativo": "Anna Chiara Bartolozzi", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 0 },
+        // ID 729
+        { "SCSTCUSTUD": 130728, "nominativo": "Vittoria Carnovale", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 49 },
+        // ID 730
+        { "SCSTCUSTUD": 130729, "nominativo": "Irene Magi", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 13 },
+        // ID 731
+        { "SCSTCUSTUD": 130730, "nominativo": "Eva Grace Metcalf", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 6 },
+        // ID 732
+        { "SCSTCUSTUD": 130731, "nominativo": "Giacomo D'Aguanno", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 14 },
+        // ID 733
+        { "SCSTCUSTUD": 130732, "nominativo": "Emma Lamouroux Guerra", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 34 },
+        // ID 734
+        { "SCSTCUSTUD": 130733, "nominativo": "Diletta Vittoria Falciani", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 10 },
+        // ID 735
+        { "SCSTCUSTUD": 130734, "nominativo": "Eleonora Diotallevi", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 44 },
+        // ID 737
+        { "SCSTCUSTUD": 130736, "nominativo": "Giulio Costa", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 14 },
+        // ID 738
+        { "SCSTCUSTUD": 130737, "nominativo": "Vittoria Recchia", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 3 },
+        // ID 740
+        { "SCSTCUSTUD": 130739, "nominativo": "Cesare Pigliucci", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 12, "quadriennale": "" },
+        // ID 741
+        { "SCSTCUSTUD": 130740, "nominativo": "Anna Pia Formica", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 3, "quadriennale": "" },
+        // ID 742
+        { "SCSTCUSTUD": 130741, "nominativo": "Clelia Fusco", "DescClasse": "5^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 5, "comunicDaLeggere": 2 },
+        // ID 745
+        { "SCSTCUSTUD": 130744, "nominativo": "Sara Zangari", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 15 },
+        // ID 746
+        { "SCSTCUSTUD": 130745, "nominativo": "Anna Maria Gallo", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 747-748
+        { "SCSTCUSTUD": 130746, "nominativo": "Gaia Maceroni", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 15 },
+        { "SCSTCUSTUD": 130747, "nominativo": "Lavinia Maceroni", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 20 },
+        // ID 750
+        { "SCSTCUSTUD": 130749, "nominativo": "Vittoria Balducci", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 6 },
+        // ID 751
+        { "SCSTCUSTUD": 130750, "nominativo": "Giacomo Ferraresi", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 752
+        { "SCSTCUSTUD": 130751, "nominativo": "Alice Moreschini", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 753
+        { "SCSTCUSTUD": 130752, "nominativo": "Sara Colapietro", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 754
+        { "SCSTCUSTUD": 130753, "nominativo": "Giordano Croce", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 755
+        { "SCSTCUSTUD": 130754, "nominativo": "Gabriel Bucci", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 8 },
+        // ID 757
+        { "SCSTCUSTUD": 130756, "nominativo": "Caterina Imperatore", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 1 },
+        // ID 758
+        { "SCSTCUSTUD": 130801, "nominativo": "Emma Martino Pennisi", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        { "SCSTCUSTUD": 130757, "nominativo": "Rebecca Martino Pennisi", "DescClasse": "2^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 759
+        { "SCSTCUSTUD": 130758, "nominativo": "Beatrice Grignolio", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 13, "quadriennale": "" },
+        // ID 761
+        { "SCSTCUSTUD": 130760, "nominativo": "Luce Gasparri", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 6 },
+        // ID 763
+        { "SCSTCUSTUD": 130762, "nominativo": "Tancredi Mazzamurro", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 5 },
+        // ID 764
+        { "SCSTCUSTUD": 130763, "nominativo": "Viola Fagiolini", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 3 },
+        // ID 765
+        { "SCSTCUSTUD": 130764, "nominativo": "Maria Sole Luciani", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 767
+        { "SCSTCUSTUD": 130766, "nominativo": "Martina Sileri", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 1 },
+        // ID 768
+        { "SCSTCUSTUD": 130767, "nominativo": "Eva Narcisse", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 43 },
+        // ID 769
+        { "SCSTCUSTUD": 130768, "nominativo": "Rebecca Bonvino", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 4 },
+        // ID 770
+        { "SCSTCUSTUD": 130769, "nominativo": "Filippo Faldetta", "DescClasse": "2^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 771
+        { "SCSTCUSTUD": 130770, "nominativo": "Maria Giulia Bruni", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 772
+        { "SCSTCUSTUD": 130771, "nominativo": "Elizaveta Colantoni", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 3 },
+        // ID 773
+        { "SCSTCUSTUD": 130772, "nominativo": "Beatrice Borrini", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 54 },
+        // ID 774
+        { "SCSTCUSTUD": 130773, "nominativo": "Nicole Busetti", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 775
+        { "SCSTCUSTUD": 130774, "nominativo": "Valerio Ciarletta", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 42 },
+        // ID 776
+        { "SCSTCUSTUD": 130775, "nominativo": "Umberto Smeragliuolo", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 777-778
+        { "SCSTCUSTUD": 130776, "nominativo": "Alice Macri'", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 24 },
+        { "SCSTCUSTUD": 130777, "nominativo": "Ludovico Macri'", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 55 },
+        // ID 779
+        { "SCSTCUSTUD": 130778, "nominativo": "Elisa Accorso Caroli", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 2 },
+        // ID 780
+        { "SCSTCUSTUD": 130779, "nominativo": "Giacomo Giraffa", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 7 },
+        // ID 781
+        { "SCSTCUSTUD": 130780, "nominativo": "Antonio Marotti", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 782
+        { "SCSTCUSTUD": 130781, "nominativo": "Sofia Pietrangeli", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 10 },
+        // ID 784
+        { "SCSTCUSTUD": 130783, "nominativo": "Caterina Patacca", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 786
+        { "SCSTCUSTUD": 130785, "nominativo": "Miriam Gentile", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 17, "quadriennale": "" },
+        // ID 787
+        { "SCSTCUSTUD": 130786, "nominativo": "Niccolo' Cappelli", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 13, "quadriennale": "" },
+        // ID 788
+        { "SCSTCUSTUD": 130787, "nominativo": "Francesco Sotgiu", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 789
+        { "SCSTCUSTUD": 130788, "nominativo": "Simone Fontana", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 2 },
+        // ID 791
+        { "SCSTCUSTUD": 130790, "nominativo": "Alicia Galan Chillon", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 17, "quadriennale": "" },
+        // ID 792
+        { "SCSTCUSTUD": 130791, "nominativo": "Tancredi Boscoscuro", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 7 },
+        // ID 794
+        { "SCSTCUSTUD": 130793, "nominativo": "Gael Franco Venancio Eusepi", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 7 },
+        // ID 795-796
+        { "SCSTCUSTUD": 130794, "nominativo": "Emma Zizzo", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 3 },
+        { "SCSTCUSTUD": 130795, "nominativo": "Tommaso Zizzo", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 797-798
+        { "SCSTCUSTUD": 130797, "nominativo": "Ilaria Bonafede", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 1 },
+        { "SCSTCUSTUD": 130796, "nominativo": "Arianna Bonafede", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 799
+        { "SCSTCUSTUD": 130798, "nominativo": "Giorgio Simoni", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 4 },
+        // ID 801
+        { "SCSTCUSTUD": 130800, "nominativo": "Anna Forgetta", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 2, "quadriennale": "" },
+        // ID 803
+        { "SCSTCUSTUD": 130802, "nominativo": "Edoardo Ravasio", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 10, "quadriennale": "" },
+        // ID 804-805
+        { "SCSTCUSTUD": 130803, "nominativo": "Leo Itzhak Roger", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 1 },
+        { "SCSTCUSTUD": 130804, "nominativo": "Ethan Yehezkel Roger", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 806
+        { "SCSTCUSTUD": 130805, "nominativo": "Lucio Zaccagna", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 807
+        { "SCSTCUSTUD": 130806, "nominativo": "Sirio Matteucci", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 7, "quadriennale": "" },
+        // ID 809
+        { "SCSTCUSTUD": 130808, "nominativo": "Sergio Milotti", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 25, "quadriennale": "" },
+        // ID 810
+        { "SCSTCUSTUD": 130809, "nominativo": "Mattia Marchese", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 811
+        { "SCSTCUSTUD": 130810, "nominativo": "Maria Francesca Lamarca", "DescClasse": "5^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 5, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 813
+        { "SCSTCUSTUD": 130812, "nominativo": "Vasco D'Epiro", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 20 },
+        // ID 814
+        { "SCSTCUSTUD": 130813, "nominativo": "Azzurra Carioti", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 4, "quadriennale": "" },
+        // ID 815
+        { "SCSTCUSTUD": 130814, "nominativo": "Alexia Zanolli", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 10 },
+        // ID 816
+        { "SCSTCUSTUD": 130815, "nominativo": "Lorenzo Caratelli", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 818
+        { "SCSTCUSTUD": 130817, "nominativo": "Antonio D'Onofrio", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 14, "quadriennale": "" },
+        // ID 819
+        { "SCSTCUSTUD": 130818, "nominativo": "Mikel Savorgnano", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 820
+        { "SCSTCUSTUD": 130819, "nominativo": "Camilla Francese", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 5, "quadriennale": "" },
+        // ID 822
+        { "SCSTCUSTUD": 130821, "nominativo": "Sofia Maria Lamura", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 1 },
+        // ID 823
+        { "SCSTCUSTUD": 130822, "nominativo": "Elisabetta Romano", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 1 },
+        // ID 824
+        { "SCSTCUSTUD": 130823, "nominativo": "Luisa Iacovella", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 1 },
+        // ID 826
+        { "SCSTCUSTUD": 130825, "nominativo": "Adil Alberto Gavinelli", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 16 },
+        // ID 829
+        { "SCSTCUSTUD": 130828, "nominativo": "Tommaso Romano", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 4, "quadriennale": "" },
+        // ID 830
+        { "SCSTCUSTUD": 130829, "nominativo": "Niccolo' Di Benedetto", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 832
+        { "SCSTCUSTUD": 130831, "nominativo": "Massimo Lantero", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 13 },
+        // ID 834
+        { "SCSTCUSTUD": 130833, "nominativo": "Dalia Martellucci", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 835
+        { "SCSTCUSTUD": 130834, "nominativo": "Jacopo Stella", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 13 },
+        // ID 836
+        { "SCSTCUSTUD": 130835, "nominativo": "Martina Mandozzi", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 28 },
+        // ID 837
+        { "SCSTCUSTUD": 130836, "nominativo": "Francesco Savoia", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 840-841
+        { "SCSTCUSTUD": 130839, "nominativo": "Maria Elena Genova", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 3 },
+        { "SCSTCUSTUD": 130840, "nominativo": "Chiara Maria Genova", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 842
+        { "SCSTCUSTUD": 130841, "nominativo": "Summer Urciuoli", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 14 },
+        // ID 843
+        { "SCSTCUSTUD": 130842, "nominativo": "Adomas Kazulenas", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 4 },
+        // ID 844
+        { "SCSTCUSTUD": 130843, "nominativo": "Francesco Romeo Marchegiani Rizzolli", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 7 },
+        // ID 846
+        { "SCSTCUSTUD": 130845, "nominativo": "Adele Ruscica", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 6 },
+        // ID 847
+        { "SCSTCUSTUD": 130846, "nominativo": "Sofia Alfonsi", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 3 },
+        // ID 848
+        { "SCSTCUSTUD": 130847, "nominativo": "Elena Angelica Adamo", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 16, "quadriennale": "" },
+        // ID 850
+        { "SCSTCUSTUD": 130849, "nominativo": "Alessandra Mollica", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 8, "quadriennale": "" },
+        // ID 852
+        { "SCSTCUSTUD": 130851, "nominativo": "Rebecca Di Francesco", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 10 },
+        // ID 854
+        { "SCSTCUSTUD": 130853, "nominativo": "Xinru Elisabeth Zhou", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 855
+        { "SCSTCUSTUD": 130854, "nominativo": "Matteo Barcellan", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 856
+        { "SCSTCUSTUD": 130855, "nominativo": "Emma Balzarini", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 18 },
+        // ID 857
+        { "SCSTCUSTUD": 130856, "nominativo": "Lucienne Francesca Morrone", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 8 },
+        // ID 858
+        { "SCSTCUSTUD": 130857, "nominativo": "Sveva Rezzonico", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 859
+        { "SCSTCUSTUD": 130858, "nominativo": "Anita Grimaldi", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 860
+        { "SCSTCUSTUD": 130859, "nominativo": "Tay Camerini", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 861
+        { "SCSTCUSTUD": 130860, "nominativo": "Niccolo' Ramazzotti", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 862
+        { "SCSTCUSTUD": 130861, "nominativo": "Alessandro Piergentili", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 864
+        { "SCSTCUSTUD": 130863, "nominativo": "Vittorio Militi", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 29 },
+        // ID 865
+        { "SCSTCUSTUD": 130864, "nominativo": "Mia Corsi", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 866
+        { "SCSTCUSTUD": 130865, "nominativo": "Beatrice Ceccanti", "DescClasse": "1^AE", "DescScuola": "Scuola Primaria Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "EL", "gradoSettore": 2, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 867-868
+        { "SCSTCUSTUD": 130867, "nominativo": "Adriana Paolini", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 7 },
+        { "SCSTCUSTUD": 130866, "nominativo": "Melissa Paolini", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 20 },
+        // ID 869
+        { "SCSTCUSTUD": 130868, "nominativo": "Alessandro De Longis", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 870
+        { "SCSTCUSTUD": 130869, "nominativo": "Sara Sacca'", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 871
+        { "SCSTCUSTUD": 130870, "nominativo": "Eleonora Di Cola", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 4 },
+        // ID 872
+        { "SCSTCUSTUD": 130871, "nominativo": "Tommaso Caporossi", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 6 },
+        // ID 873
+        { "SCSTCUSTUD": 130872, "nominativo": "Elena Tamantini", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 874
+        { "SCSTCUSTUD": 130873, "nominativo": "Alessio Iandoli Parolise", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 875
+        { "SCSTCUSTUD": 130874, "nominativo": "Vittoria Adele Bianchi", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 877
+        { "SCSTCUSTUD": 130876, "nominativo": "Lorenzo Principessa", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 878
+        { "SCSTCUSTUD": 130877, "nominativo": "Elena Carletti", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 12, "quadriennale": "" },
+        // ID 879
+        { "SCSTCUSTUD": 130878, "nominativo": "Sofia De Palma", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 880
+        { "SCSTCUSTUD": 130879, "nominativo": "Greta Ali'", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 882
+        { "SCSTCUSTUD": 130881, "nominativo": "Elena Zordan", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 883
+        { "SCSTCUSTUD": 130882, "nominativo": "Chiara Scaletta", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 8 },
+        // ID 884
+        { "SCSTCUSTUD": 130883, "nominativo": "Alessandro Zu", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 885
+        { "SCSTCUSTUD": 130884, "nominativo": "Alice Fabbri", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 5 },
+        // ID 886
+        { "SCSTCUSTUD": 130885, "nominativo": "Aurora Coco", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 887
+        { "SCSTCUSTUD": 130886, "nominativo": "Martina Di Maria", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 8, "quadriennale": "" },
+        // ID 888
+        { "SCSTCUSTUD": 130887, "nominativo": "Michele D'Orazi", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 15 },
+        // ID 890
+        { "SCSTCUSTUD": 130889, "nominativo": "Giulia Magni", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 892-893
+        { "SCSTCUSTUD": 130891, "nominativo": "Jacopo Buceti", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 10 },
+        { "SCSTCUSTUD": 130892, "nominativo": "Flavio Buceti", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "quadriennale": null, "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 894
+        { "SCSTCUSTUD": 130893, "nominativo": "Domitilla Guzzo", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 895
+        { "SCSTCUSTUD": 130894, "nominativo": "Ludovica Asta", "DescClasse": "BM.Teresa", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 896
+        { "SCSTCUSTUD": 130895, "nominativo": "Letizia Proto", "DescClasse": "1^ AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 2 },
+        // ID 897
+        { "SCSTCUSTUD": 130896, "nominativo": "Francesco Arenella", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 21 },
+        // ID 899
+        { "SCSTCUSTUD": 130898, "nominativo": "Davide Monticone", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 4 },
+        // ID 900
+        { "SCSTCUSTUD": 130899, "nominativo": "Sofia Roscioli", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 2, "quadriennale": "" },
+        // ID 901
+        { "SCSTCUSTUD": 130900, "nominativo": "Renata Polidori", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 1, "quadriennale": "" },
+        // ID 903
+        { "SCSTCUSTUD": 130902, "nominativo": "Aurora Gneo", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 10, "quadriennale": "" },
+        // ID 904
+        { "SCSTCUSTUD": 130903, "nominativo": "Francesco D'Ovidio", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 8 },
+        // ID 905
+        { "SCSTCUSTUD": 130904, "nominativo": "Edoardo Liberati", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 1 },
+        // ID 906
+        { "SCSTCUSTUD": 130905, "nominativo": "Isabella Lina De Francesco", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 10 },
+        // ID 907
+        { "SCSTCUSTUD": 130906, "nominativo": "Giulio Ferrante", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 4, "quadriennale": "" },
+        // ID 909
+        { "SCSTCUSTUD": 130908, "nominativo": "Lorenzo Lucchini Guenzi", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 13, "quadriennale": "" },
+        // ID 912
+        { "SCSTCUSTUD": 130911, "nominativo": "Beatrice Bagnoli", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 914
+        { "SCSTCUSTUD": 130913, "nominativo": "Valentina Camboni", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 1 },
+        // ID 915
+        { "SCSTCUSTUD": 130914, "nominativo": "Alessandro Di Muro De Bonis", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 0, "quadriennale": "" },
+        // ID 916
+        { "SCSTCUSTUD": 130915, "nominativo": "Rachael Minnucci", "DescClasse": "4^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 4, "comunicDaLeggere": 9 },
+        // ID 917
+        { "SCSTCUSTUD": 130916, "nominativo": "Viola Miliotti", "DescClasse": "3^AM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 0 },
+        // ID 918
+        { "SCSTCUSTUD": 130917, "nominativo": "Matteo Bechini", "DescClasse": "3^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 3, "comunicDaLeggere": 3 },
+        // ID 920
+        { "SCSTCUSTUD": 130919, "nominativo": "Alice Yu", "DescClasse": "1^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 40 },
+        // ID 921
+        { "SCSTCUSTUD": 130920, "nominativo": "Federica Carrubba", "DescClasse": "1^ A", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 1, "comunicDaLeggere": 0 },
+        // ID 922
+        { "SCSTCUSTUD": 130921, "nominativo": "Riccardo Dicembrino", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 38, "quadriennale": "" },
+        // ID 923
+        { "SCSTCUSTUD": 130922, "nominativo": "Sofia Capotorto", "DescClasse": "2^AA", "DescScuola": "Liceo Artistico S. Orsola  - RMSL015004 - Roma", "annoScol": "2025/2026", "settore": "LA", "gradoSettore": 4, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 5 },
+        // ID 924
+        { "SCSTCUSTUD": 130923, "nominativo": "Leonardo Dezi", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 4, "quadriennale": "" },
+        // ID 925
+        { "SCSTCUSTUD": 130924, "nominativo": "Gaia Sofia Baldacci", "DescClasse": "BSFranc.", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 13, "quadriennale": "" },
+        // ID 926
+        { "SCSTCUSTUD": 130925, "nominativo": "Ginevra Brenzoni", "DescClasse": "2^ BM", "DescScuola": "Scuola Secondaria I° grado Paritaria S. Orsola  - Roma", "annoScol": "2025/2026", "settore": "ME", "gradoSettore": 3, "quadriennale": "0", "numeroClasse": 2, "comunicDaLeggere": 0 },
+        // ID 967
+        { "SCSTCUSTUD": 130966, "nominativo": "Elena Lucibello", "DescClasse": "BS.Rita", "DescScuola": "Scuola dell'Infanzia Paritaria S. Orsola - Roma", "annoScol": "2025/2026", "settore": "IN", "gradoSettore": 1, "numeroClasse": 1, "comunicDaLeggere": 9, "quadriennale": "" },
+        // ID 997
+        { "SCSTCUSTUD": 130996, "nominativo": "Aurora Costa", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 33, "quadriennale": "" },
+        // ID 1002
+        { "SCSTCUSTUD": 131001, "nominativo": "Tommaso Rondanini", "DescClasse": "2^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 2, "comunicDaLeggere": 45, "quadriennale": "" },
+        // ID 1003
+        { "SCSTCUSTUD": 131002, "nominativo": "Viola Gustinetti", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 33, "quadriennale": "" },
+        // ID 1010
+        { "SCSTCUSTUD": 131009, "nominativo": "Ginevra Silvana Vecchione", "DescClasse": "1^AD", "DescScuola": "Liceo Classico S. Orsola  - RMPC 525003 - Roma", "annoScol": "2025/2026", "settore": "LC", "gradoSettore": 4, "numeroClasse": 1, "comunicDaLeggere": 46, "quadriennale": "" }
+    ];
+
+    // unifica tutti gli studenti univoci per ID (evitare duplicati)
+    const studentMap = new Map();
+    studentsRaw.forEach(s => {
+        if (!studentMap.has(s.SCSTCUSTUD)) {
+            studentMap.set(s.SCSTCUSTUD, s);
+        }
+    });
+    const studenti = Array.from(studentMap.values()).map(s => ({
+        id: s.SCSTCUSTUD,
+        nome: s.nominativo,
+        classe: s.DescClasse,
+        scuola: s.DescScuola,
+        anno: s.annoScol || "2025/2026",
+        settore: s.settore,
+        grado: s.gradoSettore,
+        numeroClasse: s.numeroClasse,
+        comunicazioni: s.comunicDaLeggere ?? 0,
+        quadriennale: s.quadriennale
+    }));
+
+    // elementi dom
+    const searchInput = document.getElementById('searchInput');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const statsCounter = document.getElementById('statsCounter');
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderResults(filtered) {
+        if (!filtered.length) {
+            resultsContainer.innerHTML = `<div class="no-results">✨ Nessuno studente trovato. Prova con nome, ID (es. 130010) o classe come "3^BM" ✨</div>`;
+            statsCounter.innerText = `🔍 0 risultati`;
+            return;
+        }
+        statsCounter.innerText = `📌 ${filtered.length} studente${filtered.length !== 1 ? 'i' : ''} trovati`;
+        const html = filtered.map(s => `
+            <div class="student-card">
+                <div class="card-header">
+                    <span class="student-name">${escapeHtml(s.nome)}</span>
+                    <span class="student-id">ID ${s.id}</span>
+                </div>
+                <div class="detail-row"><span class="detail-label">Classe:</span><span class="detail-value">${escapeHtml(s.classe)}</span></div>
+                <div class="detail-row"><span class="detail-label">Scuola:</span><span class="detail-value">${escapeHtml(s.scuola)}</span></div>
+                <div class="detail-row"><span class="detail-label">Settore:</span><span class="detail-value">${escapeHtml(s.settore)} (Grado ${s.grado})</span></div>
+                <div class="detail-row"><span class="detail-label">Numero classe:</span><span class="detail-value">${s.numeroClasse ?? '-'}</span></div>
+                <div class="badge-scuola">📅 ${s.anno}</div>
+                ${s.comunicazioni > 0 ? `<div class="comunicazioni">📬 Comunicazioni da leggere: ${s.comunicazioni}</div>` : `<div class="comunicazioni" style="background:#f2f4f8; color:#6b7a5c;">✅ Nessuna comunicazione in sospeso</div>`}
+            </div>
+        `).join('');
+        resultsContainer.innerHTML = html;
+    }
+
+    function searchStudents(query) {
+        if (!query.trim()) {
+            renderResults([]);
+            statsCounter.innerText = `✏️ Inizia a digitare per cercare studenti...`;
+            return;
+        }
+        const q = query.trim().toLowerCase();
+        const filtered = studenti.filter(s => {
+            const matchId = String(s.id).includes(q);
+            const matchNome = s.nome.toLowerCase().includes(q);
+            const matchClasse = s.classe.toLowerCase().includes(q);
+            const matchScuola = s.scuola.toLowerCase().includes(q);
+            return matchId || matchNome || matchClasse || matchScuola;
+        });
+        renderResults(filtered);
+    }
+
+    let debounceTimer;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            searchStudents(e.target.value);
+        }, 150);
+    });
+
+    renderResults([]);
+    statsCounter.innerText = `🔎 Cerca per nome, ID o classe (es. "130010", "Bianca", "2^AD")`;
+</script>
+</body>
+</html>
